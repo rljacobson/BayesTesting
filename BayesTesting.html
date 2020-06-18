@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bayes Testing</title>
+
+    <link rel="stylesheet" href="bayestesting.css"/>
+
+    <script type="text/javascript" id="MathJax-script" async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+    </script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script type="text/javascript" id="BayesTesting-script" async
+            src="bayestesting.js">
+    </script>
+</head>
+<body>
+
+
+<div id="center_content">
+    <div id="top_pane">
+        <div id="illustration">
+                <div class="people_count_group slider-labels">
+                    <div id="people_count_label" class="people_count_group slider-labels">Number of
+                        People:
+                    </div>
+                    <div id="people_count" class="slider-labels people_count_group">2500</div>
+                    <br>
+                    <div id="people_dots">
+                    </div>
+                </div>
+                <br>
+
+            <form  action="#" id="slider-group">
+                <div id="displayAsForm"><input type="radio" name="displayAsRadio" id="Cluster"
+                                     value="Cluster"
+                             checked>
+                    <label for="Cluster">Cluster</label><br>
+                    <input type="radio" name="displayAsRadio" id="Grid" value="Grid">
+                    <label for="Grid">Grid</label>
+                </div>
+
+                <label class="slider-labels" for="true_positive_rate_slider">
+                    Sensitivity (True Positive Rate): </label>
+                <output for="true_positive_rate_slider" id="true_positive_rate"
+                        class="slider-labels">41.00%
+                </output>
+                <br>
+                <input type="range"
+                       id="true_positive_rate_slider" class="slider-widget" min="0.0"
+                       max="1.0" step="any" value="0.41" oninput="sliderUpdate(value,
+                   '#true_positive_rate')"/><br>
+
+                <label class="slider-labels" for="true_negative_rate_slider">
+                    Specificity (True Negative Rate):
+                </label>
+                <output for="true_negative_rate_slider" id="true_negative_rate"
+                        class="slider-labels">
+                    94.00%
+                </output>
+                <br>
+                <input type="range"
+                       id="true_negative_rate_slider" class="slider-widget" min="0.30"
+                       max="1.0" step="any" value="0.94"
+                       oninput="sliderUpdate(value, '#true_negative_rate')"/><br>
+
+                <label class="slider-labels" for="infection_rate_slider">
+                    Infection Rate:
+                </label>
+                <output for="infection_rate_slider" id="infection_rate" class="slider-labels">5.00%
+                </output>
+                <br>
+                <input type="range"
+                       id="infection_rate_slider" class="slider-widget" min="0.0"
+                       max="0.2" step="any" value="0.05" oninput="sliderUpdate(value,
+                   '#infection_rate')"/>
+            </form>
+        </div>
+
+        <div>
+            <p class="stats_title">Naïve Testing</p>
+            <table class="wikitable">
+                <tbody>
+                <tr>
+                    <td>
+                        <dl>
+                            <dt>true positive (TP)</dt>
+                            <dd>eqv. with hit</dd>
+                        </dl>
+                    </td>
+                    <td class="answer-equals">$$=$$</td>
+                    <td id="true_positive_count" class="answer-value"></td>
+                </tr>
+                </tbody>
+            </table>
+            <table class="wikitable">
+                <tbody>
+                <tr>
+                    <td>
+                        <dl>
+                            <dt>true negative (TN)</dt>
+                            <dd>eqv. with correct rejection</dd>
+                        </dl>
+                    </td>
+                    <td class="answer-equals">$$=$$</td>
+                    <td id="true_negative_count" class="answer-value"></td>
+                </tr>
+                </tbody>
+            </table>
+            <table class="wikitable">
+                <tbody>
+                <tr>
+                    <td>
+                        <dl>
+                            <dt>false positive (FP)</dt>
+                            <dd> eqv. with <a href="https://en.wikipedia.org/wiki/False_alarm"
+                                              title="">false
+                                alarm</a><a href="https://en.wikipedia.org/wiki/Type_I_error"
+                                            title="">
+                                Type
+                                I error </a></dd>
+                        </dl>
+                    </td>
+                    <td class="answer-equals">$$=$$</td>
+                    <td id="false_positive_count" class="answer-value"></td>
+                </tr>
+                </tbody>
+            </table>
+            <table class="wikitable">
+                <tbody>
+                <tr>
+                    <td>
+                        <dl>
+                            <dt>false negative (FN)</dt>
+                            <dd>eqv. with miss <a href="https://en.wikipedia.org/wiki/Type_II_error"
+                                                  title=""> Type II error </a></dd>
+                        </dl>
+                    </td>
+                    <td class="answer-equals">$$=$$</td>
+                    <td id="false_negative_count" class="answer-value"></td>
+                </tr>
+                <tr class="row-line"></tr>
+                </tbody>
+            </table>
+            <table class="wikitable">
+                <tbody>
+                <tr>
+                    <td>
+                        <dl>
+                            <dt><a href="https://en.wikipedia.org/wiki/Sensitivity_(test)"
+                                   title="Sensitivity (test)">sensitivity, </a><a
+                                    href="https://en.wikipedia.org/wiki/Precision_and_recall#Recall"
+                                    title="Precision and recall"> recall, </a><a
+                                    href="https://en.wikipedia.org/wiki/Hit_rate" title="Hit rate">
+                                hit
+                                rate </a>or <a
+                                    href="https://en.wikipedia.org/wiki/Sensitivity_(test)"
+                                    title="Sensitivity (test)">true positive rate</a> (TPR)
+                            </dt>
+                            <dd>$$\mathrm {TPR} ={\frac {\mathrm {TP} }{\mathrm {P} }}={\frac
+                                {\mathrm
+                                {TP}
+                                }{\mathrm {TP} +\mathrm {FN} }}=1-\mathrm {FNR} $$
+                            </dd>
+                        </dl>
+                    </td>
+                    <td class="answer-equals">$$=$$</td>
+                    <td id="sensitivity" class="answer-value"></td>
+                </tr>
+                </tbody>
+            </table>
+            <table class="wikitable">
+                <tbody>
+                <tr>
+                    <td>
+                        <dl>
+                            <dt><a href="https://en.wikipedia.org/wiki/Specificity_(tests)"
+                                   title="Specificity (tests)">specificity, </a><a
+                                    href="https://en.wikipedia.org/wiki/Specificity_(tests)"
+                                    title="Specificity (tests)">selectivity,</a> or <a
+                                    href="https://en.wikipedia.org/wiki/Specificity_(tests)"
+                                    title="Specificity (tests)">true negative rate</a> (TNR)
+                            </dt>
+                            <dd>$$\mathrm {TNR} ={\frac {\mathrm {TN} }{\mathrm {N} }}={\frac
+                                {\mathrm
+                                {TN}
+                                }{\mathrm {TN} +\mathrm {FP} }}=1-\mathrm {FPR} $$
+                            </dd>
+                        </dl>
+                    </td>
+                    <td class="answer-equals">$$=$$</td>
+                    <td id="specificity" class="answer-value"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div>
+            <table class="wikitable">
+            <tbody>
+
+            <tr class="row-line"></tr>
+            <tr>
+                <td>
+                    <dl>
+                        <dt>condition positive (P)</dt>
+                        <dd>the number of real positive cases in the data</dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="positive_count" class="answer-value"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt>condition negative (N)</dt>
+                        <dd>the number of real negative cases in the data</dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="negative_count" class="answer-value"></td>
+            </tr>
+            <tr class="row-line"></tr>
+            </tbody>
+        </table>
+        </div>
+<br>
+        <div>
+        <p class="stats_title">Simulated Test Pooling</p>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt>true positive (TP)</dt>
+                        <dd>eqv. with hit</dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="simulated_true_positive" class="answer-value"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt>true negative (TN)</dt>
+                        <dd>eqv. with correct rejection</dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="simulated_true_negative" class="answer-value"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt>false positive (FP)</dt>
+                        <dd> eqv. with <a href="https://en.wikipedia.org/wiki/False_alarm" title="">false
+                            alarm</a><a href="https://en.wikipedia.org/wiki/Type_I_error" title="">
+                            Type
+                            I error </a></dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="simulated_false_positive" class="answer-value"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt>false negative (FN)</dt>
+                        <dd>eqv. with miss <a href="https://en.wikipedia.org/wiki/Type_II_error"
+                                              title=""> Type II error </a></dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="simulated_false_negative" class="answer-value"></td>
+            </tr>
+            <tr class="row-line"></tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt><a href="https://en.wikipedia.org/wiki/Sensitivity_(test)"
+                               title="Sensitivity (test)">sensitivity, </a><a
+                                href="https://en.wikipedia.org/wiki/Precision_and_recall#Recall"
+                                title="Precision and recall"> recall, </a><a
+                                href="https://en.wikipedia.org/wiki/Hit_rate" title="Hit rate"> hit
+                            rate </a>or <a href="https://en.wikipedia.org/wiki/Sensitivity_(test)"
+                                           title="Sensitivity (test)">true positive rate</a> (TPR)
+                        </dt>
+                        <dd>$$\mathrm {TPR} ={\frac {\mathrm {TP} }{\mathrm {P} }}={\frac {\mathrm
+                            {TP}
+                            }{\mathrm {TP} +\mathrm {FN} }}=1-\mathrm {FNR} $$
+                        </dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="effective_simulated_sensitivity" class="answer-value"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt><a href="https://en.wikipedia.org/wiki/Specificity_(tests)"
+                               title="Specificity (tests)">specificity, </a><a
+                                href="https://en.wikipedia.org/wiki/Specificity_(tests)"
+                                title="Specificity (tests)">selectivity,</a> or <a
+                                href="https://en.wikipedia.org/wiki/Specificity_(tests)"
+                                title="Specificity (tests)">true negative rate</a> (TNR)
+                        </dt>
+                        <dd>$$\mathrm {TNR} ={\frac {\mathrm {TN} }{\mathrm {N} }}={\frac {\mathrm
+                            {TN}
+                            }{\mathrm {TN} +\mathrm {FP} }}=1-\mathrm {FPR} $$
+                        </dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="effective_simulated_specificity" class="answer-value"></td>
+            </tr>
+
+            <tr class="row-line"></tr>
+            </tbody>
+        </table>
+<table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <p style="font-weight: bold">Pool Size</p>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="pool_size" class="answer-value"></td>
+            </tr>
+            <tr>
+                <td>
+                    <dl>
+                        <dt>Tests Used</dt>
+                        <dd>pooled and retests</dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="simulated_tests_used" class="answer-value"></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+
+    </div>
+
+    <hr>
+
+    <div id="bottom_pane">
+
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt><a href="https://en.wikipedia.org/wiki/Information_retrieval#Precision"
+                               title="Information retrieval">precision</a> or <a
+                                href="https://en.wikipedia.org/wiki/Positive_predictive_value"
+                                title="Positive predictive value">positive predictive value</a>
+                            (PPV)
+                        </dt>
+                        <dd>$$\mathrm {PPV} ={\frac {\mathrm {TP} }{\mathrm {TP} +\mathrm {FP}
+                            }}=1-\mathrm {FDR} $$
+                        </dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="precision" class="answer-value"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt id="negative predictive value"><a
+                                href="https://en.wikipedia.org/wiki/Negative_predictive_value"
+                                title="Negative predictive value">negative predictive value</a>
+                            (NPV)
+                        </dt>
+                        <dd>$$\mathrm {NPV} ={\frac {\mathrm {TN} }{\mathrm {TN} +\mathrm {FN}
+                            }}=1-\mathrm {FOR} $$
+                        </dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="negative_predictive_value" class="answer-value"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt>miss rate or <a
+                                href="https://en.wikipedia.org/wiki/Type_I_and_type_II_errors#False_positive_and_false_negative_rates"
+                                title="Type I and type II errors">false negative rate</a> (FNR)
+                        </dt>
+                        <dd>$$\mathrm {FNR} ={\frac {\mathrm {FN} }{\mathrm {P} }}={\frac {\mathrm
+                            {FN}
+                            }{\mathrm {FN} +\mathrm {TP} }}=1-\mathrm {TPR} $$
+                        </dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="false_negative_rate" class="answer-value"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt id="fall"><a href="https://en.wikipedia.org/wiki/False_positive_rate"
+                                         title="False positive rate">fall-out</a> or <a
+                                href="https://en.wikipedia.org/wiki/False_positive_rate"
+                                title="False positive rate">false positive rate</a> (FPR)
+                        </dt>
+                        <dd>$$\mathrm {FPR} ={\frac {\mathrm {FP} }{\mathrm {N} }}={\frac {\mathrm
+                            {FP}
+                            }{\mathrm {FP} +\mathrm {TN} }}=1-\mathrm {TNR} $$
+                        </dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="false_positive_rate" class="answer-value"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt><a href="https://en.wikipedia.org/wiki/False_discovery_rate"
+                               title="False discovery rate">false discovery rate </a>(FDR)
+                        </dt>
+                        <dd>$$\mathrm {FDR} ={\frac {\mathrm {FP} }{\mathrm {FP} +\mathrm {TP}
+                            }}=1-\mathrm {PPV} $$
+                        </dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="false_discovery_rate" class="answer-value"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt>
+                            <a href="https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values"
+                               title="Positive and negative predictive values">false omission
+                                rate</a>
+                            (FOR)
+                        </dt>
+                        <dd>$$\mathrm {FOR} ={\frac {\mathrm {FN} }{\mathrm {FN} +\mathrm {TN}
+                            }}=1-\mathrm {NPV} $$
+                        </dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="false_omission_rate" class="answer-value"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt>Prevalence Threshold (PT)</dt>
+                        <dd>$$PT={\frac {{\sqrt {TPR(-TNR+1)}}+TNR-1}{(TPR+TNR-1)}}$$</dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="prevalence_threshold" class="answer-value"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt>Threat score (TS)</dt>
+                        <dd>$$\mathrm {TS} ={\frac {\mathrm {TP} }{\mathrm {TP} +\mathrm {FN}
+                            +\mathrm
+                            {FP} }}$$
+                        </dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="threat_score" class="answer-value"></td>
+            </tr>
+            <tr class="row-line"></tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt><a href="https://en.wikipedia.org/wiki/Accuracy"
+                               title="Accuracy">accuracy</a>(ACC)
+                        </dt>
+                        <dd>$$\mathrm {ACC} ={\frac {\mathrm {TP} +\mathrm {TN} }{\mathrm {P}
+                            +\mathrm
+                            {N} }}={\frac {\mathrm {TP} +\mathrm {TN} }{\mathrm {TP} +\mathrm {TN}
+                            +\mathrm {FP} +\mathrm {FN} }}$$
+                        </dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="accuracy" class="answer-value"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt>balanced accuracy (BA)</dt>
+                        <dd>$$\mathrm {BA} ={\frac {TPR+TNR}{2}}$$</dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="balanced_accuracy" class="answer-value"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt><a href="https://en.wikipedia.org/wiki/F1_score" title="F1 score">F1
+                            score</a></dt>
+                        <dd>is the <a
+                                href="https://en.wikipedia.org/wiki/Harmonic_mean#Harmonic_mean_of_two_numbers"
+                                title="Harmonic mean">harmonic mean</a> of <a
+                                href="https://en.wikipedia.org/wiki/Information_retrieval#Precision"
+                                title="Information retrieval">precision</a> and <a
+                                href="https://en.wikipedia.org/wiki/Sensitivity_(test)"
+                                title="Sensitivity (test)">sensitivity</a></dd>
+                        <dd>$$\mathrm {F} _{1}=2\cdot {\frac {\mathrm {PPV} \cdot \mathrm {TPR}
+                            }{\mathrm {PPV} +\mathrm {TPR} }}={\frac {2\mathrm {TP} }{2\mathrm {TP}
+                            +\mathrm {FP} +\mathrm {FN} }}$$
+                        </dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="f1_score" class="answer-value"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt><a href="https://en.wikipedia.org/wiki/Matthews_correlation_coefficient"
+                               title="Matthews correlation coefficient">Matthews correlation
+                            coefficient</a> (MCC)
+                        </dt>
+                        <dd>$$\mathrm {MCC} ={\frac {\mathrm {TP} \times \mathrm {TN} -\mathrm {FP}
+                            \times \mathrm {FN} }{\sqrt {(\mathrm {TP} +\mathrm {FP} )(\mathrm {TP}
+                            +\mathrm {FN} )(\mathrm {TN} +\mathrm {FP} )(\mathrm {TN} +\mathrm {FN}
+                            )}}}$$
+                        </dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="matthews_cc" class="answer-value"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt><a href="https://en.wikipedia.org/wiki/Fowlkes%E2%80%93Mallows_index"
+                               title="Fowlkes–Mallows index">Fowlkes–Mallows index</a> (FM)
+                        </dt>
+                        <dd>$$\mathrm {FM} ={\sqrt {{\frac {TP}{TP+FP}}\cdot {\frac
+                            {TP}{TP+FN}}}}={\sqrt {PPV\cdot TPR}}$$
+                        </dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="fowlkes_mallows_index" class="answer-value"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt><a href="https://en.wikipedia.org/wiki/Informedness"
+                               title="Informedness">informedness </a>
+                            or bookmaker informedness (BM)
+                        </dt>
+                        <dd>$$\mathrm {BM} =\mathrm {TPR} +\mathrm {TNR} -1$$</dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="informedness" class="answer-value"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="wikitable">
+            <tbody>
+            <tr>
+                <td>
+                    <dl>
+                        <dt><a href="https://en.wikipedia.org/wiki/Markedness" title="Markedness">markedness</a>(MK)
+                            or deltaP
+                        </dt>
+                        <dd>$$\mathrm {MK} =\mathrm {PPV} +\mathrm {NPV} -1$$</dd>
+                    </dl>
+                </td>
+                <td class="answer-equals">$$=$$</td>
+                <td id="markedness" class="answer-value"></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>
