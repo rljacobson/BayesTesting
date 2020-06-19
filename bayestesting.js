@@ -293,6 +293,17 @@ function simulate() {
 
     tests++; // One test for the pool.
 
+    // P(no infected in pool) = P(not infected)^pool_size
+    pool_not_infected = (1 - infection_rate)^pool_size;
+    pool_infected = 1 - pool_not_infected;
+    // P(infected | pool_infected) = P(infected and pool infected)/P(pool infected)
+    // = P(infected)/P(pool_infected)
+    infected_given_pool_infected = infection_rate / pool_infected;
+    not_infected_given_pool_infected = 1 - infected_given_pool_infected;
+    // positive_given_pool_positive =
+
+
+
     if (pool.every(d => (d.color === 0))) {
       // All members of the pool are negative
       // Negative

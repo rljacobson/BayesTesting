@@ -18,20 +18,18 @@
 
 
 <div id="center_content">
-    <div id="top_pane">
-        <div id="illustration">
-                <div class="people_count_group slider-labels">
-                    <div id="people_count_label" class="people_count_group slider-labels">Number of
-                        People:
-                    </div>
-                    <div id="people_count" class="slider-labels people_count_group">2500</div>
-                    <br>
-                    <div id="people_dots">
-                    </div>
+    <div id="top_pane" class="row-container">
+        <div id="illustration" class="row-item column-container">
+            <div id="people_count_group" class="column-item">
+                <div id="people_count_label" class="slider-labels">Number of
+                    People:
+                    <div id="people_count" class="slider-labels">2500</div>
                 </div>
-                <br>
+            </div>
+            <div id="people_dots" class="column-item">
+            </div>
 
-            <form  action="#" id="slider-group">
+            <form  action="#" id="slider-group" class="column-item">
                 <div id="displayAsForm"><input type="radio" name="displayAsRadio" id="Cluster"
                                      value="Cluster"
                              checked>
@@ -77,8 +75,8 @@
             </form>
         </div>
 
-        <div>
-            <p class="stats_title">Naïve Testing</p>
+        <div id="naive-testing" class="row-item column-container">
+            <p class="stats_title column-item">Naïve Testing</p>
             <table class="wikitable">
                 <tbody>
                 <tr>
@@ -193,26 +191,23 @@
                 </tr>
                 </tbody>
             </table>
-        </div>
-
-        <div>
             <table class="wikitable">
-            <tbody>
+                <tbody>
 
-            <tr class="row-line"></tr>
-            <tr>
-                <td>
-                    <dl>
-                        <dt>condition positive (P)</dt>
-                        <dd>the number of real positive cases in the data</dd>
-                    </dl>
-                </td>
-                <td class="answer-equals">$$=$$</td>
-                <td id="positive_count" class="answer-value"></td>
-            </tr>
-            </tbody>
-        </table>
-        <table class="wikitable">
+                <tr class="row-line"></tr>
+                <tr>
+                    <td>
+                        <dl>
+                            <dt>condition positive (P)</dt>
+                            <dd>the number of real positive cases in the data</dd>
+                        </dl>
+                    </td>
+                    <td class="answer-equals">$$=$$</td>
+                    <td id="positive_count" class="answer-value"></td>
+                </tr>
+                </tbody>
+            </table>
+            <table class="wikitable">
             <tbody>
             <tr>
                 <td>
@@ -228,147 +223,148 @@
             </tbody>
         </table>
         </div>
-<br>
-        <div>
-        <p class="stats_title">Simulated Test Pooling</p>
-        <table class="wikitable">
-            <tbody>
-            <tr>
-                <td>
-                    <dl>
-                        <dt>true positive (TP)</dt>
-                        <dd>eqv. with hit</dd>
-                    </dl>
-                </td>
-                <td class="answer-equals">$$=$$</td>
-                <td id="simulated_true_positive" class="answer-value"></td>
-            </tr>
-            </tbody>
-        </table>
-        <table class="wikitable">
-            <tbody>
-            <tr>
-                <td>
-                    <dl>
-                        <dt>true negative (TN)</dt>
-                        <dd>eqv. with correct rejection</dd>
-                    </dl>
-                </td>
-                <td class="answer-equals">$$=$$</td>
-                <td id="simulated_true_negative" class="answer-value"></td>
-            </tr>
-            </tbody>
-        </table>
-        <table class="wikitable">
-            <tbody>
-            <tr>
-                <td>
-                    <dl>
-                        <dt>false positive (FP)</dt>
-                        <dd> eqv. with <a href="https://en.wikipedia.org/wiki/False_alarm" title="">false
-                            alarm</a><a href="https://en.wikipedia.org/wiki/Type_I_error" title="">
-                            Type
-                            I error </a></dd>
-                    </dl>
-                </td>
-                <td class="answer-equals">$$=$$</td>
-                <td id="simulated_false_positive" class="answer-value"></td>
-            </tr>
-            </tbody>
-        </table>
-        <table class="wikitable">
-            <tbody>
-            <tr>
-                <td>
-                    <dl>
-                        <dt>false negative (FN)</dt>
-                        <dd>eqv. with miss <a href="https://en.wikipedia.org/wiki/Type_II_error"
-                                              title=""> Type II error </a></dd>
-                    </dl>
-                </td>
-                <td class="answer-equals">$$=$$</td>
-                <td id="simulated_false_negative" class="answer-value"></td>
-            </tr>
-            <tr class="row-line"></tr>
-            </tbody>
-        </table>
-        <table class="wikitable">
-            <tbody>
-            <tr>
-                <td>
-                    <dl>
-                        <dt><a href="https://en.wikipedia.org/wiki/Sensitivity_(test)"
-                               title="Sensitivity (test)">sensitivity, </a><a
-                                href="https://en.wikipedia.org/wiki/Precision_and_recall#Recall"
-                                title="Precision and recall"> recall, </a><a
-                                href="https://en.wikipedia.org/wiki/Hit_rate" title="Hit rate"> hit
-                            rate </a>or <a href="https://en.wikipedia.org/wiki/Sensitivity_(test)"
-                                           title="Sensitivity (test)">true positive rate</a> (TPR)
-                        </dt>
-                        <dd>$$\mathrm {TPR} ={\frac {\mathrm {TP} }{\mathrm {P} }}={\frac {\mathrm
-                            {TP}
-                            }{\mathrm {TP} +\mathrm {FN} }}=1-\mathrm {FNR} $$
-                        </dd>
-                    </dl>
-                </td>
-                <td class="answer-equals">$$=$$</td>
-                <td id="effective_simulated_sensitivity" class="answer-value"></td>
-            </tr>
-            </tbody>
-        </table>
-        <table class="wikitable">
-            <tbody>
-            <tr>
-                <td>
-                    <dl>
-                        <dt><a href="https://en.wikipedia.org/wiki/Specificity_(tests)"
-                               title="Specificity (tests)">specificity, </a><a
-                                href="https://en.wikipedia.org/wiki/Specificity_(tests)"
-                                title="Specificity (tests)">selectivity,</a> or <a
-                                href="https://en.wikipedia.org/wiki/Specificity_(tests)"
-                                title="Specificity (tests)">true negative rate</a> (TNR)
-                        </dt>
-                        <dd>$$\mathrm {TNR} ={\frac {\mathrm {TN} }{\mathrm {N} }}={\frac {\mathrm
-                            {TN}
-                            }{\mathrm {TN} +\mathrm {FP} }}=1-\mathrm {FPR} $$
-                        </dd>
-                    </dl>
-                </td>
-                <td class="answer-equals">$$=$$</td>
-                <td id="effective_simulated_specificity" class="answer-value"></td>
-            </tr>
 
-            <tr class="row-line"></tr>
-            </tbody>
-        </table>
-<table class="wikitable">
-            <tbody>
-            <tr>
-                <td>
-                    <p style="font-weight: bold">Pool Size</p>
-                </td>
-                <td class="answer-equals">$$=$$</td>
-                <td id="pool_size" class="answer-value"></td>
-            </tr>
-            <tr>
-                <td>
-                    <dl>
-                        <dt>Tests Used</dt>
-                        <dd>pooled and retests</dd>
-                    </dl>
-                </td>
-                <td class="answer-equals">$$=$$</td>
-                <td id="simulated_tests_used" class="answer-value"></td>
-            </tr>
-            </tbody>
-        </table>
+        <div id="simulated-testing" class="row-item column-container">
+            <p class="stats_title column-item">Simulated Test Pooling</p>
+            <table class="wikitable">
+                <tbody>
+                <tr>
+                    <td>
+                        <dl>
+                            <dt>true positive (TP)</dt>
+                            <dd>eqv. with hit</dd>
+                        </dl>
+                    </td>
+                    <td class="answer-equals">$$=$$</td>
+                    <td id="simulated_true_positive" class="answer-value"></td>
+                </tr>
+                </tbody>
+            </table>
+            <table class="wikitable">
+                <tbody>
+                <tr>
+                    <td>
+                        <dl>
+                            <dt>true negative (TN)</dt>
+                            <dd>eqv. with correct rejection</dd>
+                        </dl>
+                    </td>
+                    <td class="answer-equals">$$=$$</td>
+                    <td id="simulated_true_negative" class="answer-value"></td>
+                </tr>
+                </tbody>
+            </table>
+            <table class="wikitable">
+                <tbody>
+                <tr>
+                    <td>
+                        <dl>
+                            <dt>false positive (FP)</dt>
+                            <dd> eqv. with <a href="https://en.wikipedia.org/wiki/False_alarm" title="">false
+                                alarm</a><a href="https://en.wikipedia.org/wiki/Type_I_error" title="">
+                                Type
+                                I error </a></dd>
+                        </dl>
+                    </td>
+                    <td class="answer-equals">$$=$$</td>
+                    <td id="simulated_false_positive" class="answer-value"></td>
+                </tr>
+                </tbody>
+            </table>
+            <table class="wikitable">
+                <tbody>
+                <tr>
+                    <td>
+                        <dl>
+                            <dt>false negative (FN)</dt>
+                            <dd>eqv. with miss <a href="https://en.wikipedia.org/wiki/Type_II_error"
+                                                  title=""> Type II error </a></dd>
+                        </dl>
+                    </td>
+                    <td class="answer-equals">$$=$$</td>
+                    <td id="simulated_false_negative" class="answer-value"></td>
+                </tr>
+                <tr class="row-line"></tr>
+                </tbody>
+            </table>
+            <table class="wikitable">
+                <tbody>
+                <tr>
+                    <td>
+                        <dl>
+                            <dt><a href="https://en.wikipedia.org/wiki/Sensitivity_(test)"
+                                   title="Sensitivity (test)">sensitivity, </a><a
+                                    href="https://en.wikipedia.org/wiki/Precision_and_recall#Recall"
+                                    title="Precision and recall"> recall, </a><a
+                                    href="https://en.wikipedia.org/wiki/Hit_rate" title="Hit rate"> hit
+                                rate </a>or <a href="https://en.wikipedia.org/wiki/Sensitivity_(test)"
+                                               title="Sensitivity (test)">true positive rate</a> (TPR)
+                            </dt>
+                            <dd>$$\mathrm {TPR} ={\frac {\mathrm {TP} }{\mathrm {P} }}={\frac {\mathrm
+                                {TP}
+                                }{\mathrm {TP} +\mathrm {FN} }}=1-\mathrm {FNR} $$
+                            </dd>
+                        </dl>
+                    </td>
+                    <td class="answer-equals">$$=$$</td>
+                    <td id="effective_simulated_sensitivity" class="answer-value"></td>
+                </tr>
+                </tbody>
+            </table>
+            <table class="wikitable">
+                <tbody>
+                <tr>
+                    <td>
+                        <dl>
+                            <dt><a href="https://en.wikipedia.org/wiki/Specificity_(tests)"
+                                   title="Specificity (tests)">specificity, </a><a
+                                    href="https://en.wikipedia.org/wiki/Specificity_(tests)"
+                                    title="Specificity (tests)">selectivity,</a> or <a
+                                    href="https://en.wikipedia.org/wiki/Specificity_(tests)"
+                                    title="Specificity (tests)">true negative rate</a> (TNR)
+                            </dt>
+                            <dd>$$\mathrm {TNR} ={\frac {\mathrm {TN} }{\mathrm {N} }}={\frac {\mathrm
+                                {TN}
+                                }{\mathrm {TN} +\mathrm {FP} }}=1-\mathrm {FPR} $$
+                            </dd>
+                        </dl>
+                    </td>
+                    <td class="answer-equals">$$=$$</td>
+                    <td id="effective_simulated_specificity" class="answer-value"></td>
+                </tr>
+
+                <tr class="row-line"></tr>
+                </tbody>
+            </table>
+            <table class="wikitable">
+                <tbody>
+                <tr>
+                    <td>
+                        <p style="font-weight: bold">Pool Size</p>
+                    </td>
+                    <td class="answer-equals">$$=$$</td>
+                    <td id="pool_size" class="answer-value"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <dl>
+                            <dt>Tests Used</dt>
+                            <dd>pooled and retests</dd>
+                        </dl>
+                    </td>
+                    <td class="answer-equals">$$=$$</td>
+                    <td id="simulated_tests_used" class="answer-value"></td>
+                </tr>
+                <tr class="row-line"></tr>
+                </tbody>
+            </table>
         </div>
 
     </div>
 
     <hr>
 
-    <div id="bottom_pane">
+    <div id="bottom_pane" class="">
 
         <table class="wikitable">
             <tbody>
@@ -520,7 +516,7 @@
                 <td class="answer-equals">$$=$$</td>
                 <td id="threat_score" class="answer-value"></td>
             </tr>
-            <tr class="row-line"></tr>
+
             </tbody>
         </table>
         <table class="wikitable">
