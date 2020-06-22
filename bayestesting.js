@@ -293,19 +293,67 @@ function simulate() {
 
     tests++; // One test for the pool.
 
+    /*
+      We assume pooling doesn't affect sensitivity and specificity. Though this is unlikely for most testing
+       contexts, it is approximately correct with qPCR diagnostic methods.
+
+     */
+
     // P(no infected in pool) = P(not infected)^pool_size
     pool_not_infected = (1 - infection_rate)^pool_size;
     pool_infected = 1 - pool_not_infected;
     // P(infected | pool_infected) = P(infected and pool infected)/P(pool infected)
     // = P(infected)/P(pool_infected)
     infected_given_pool_infected = infection_rate / pool_infected;
+
+    //needed?
     not_infected_given_pool_infected = 1 - infected_given_pool_infected;
-    // positive_given_pool_positive =
+
+
+
+
+    // P(pool positive | not infected), where the condition is, only the given single person is not infected.
+    // Two cases: at least one of the other people is infected, or none of the others are infected.
+    // P(pool positive | not infected) = P(pool positive | pool not infected) * P(pool not infected | not infected)
+    // + P(pool positive | pool infected) * P(pool infected | not infected)
+    // = false_positive_rate * (1 - infection_rate)^(pool_size-1) + sensitivity* [1 - (1 - infection_rate)^(pool_size-1)]
+    pool_positive_given_not_infected = false_positive_rate*(1 - infection_rate)^(pool_size-1) +
+                                       sensitivity* [1 - (1 - infection_rate)^(pool_size-1)]
+    // P(pool positive | infected) = P(pool positive | pool infected) = sensitivity
+
+    // P(pool negative | not infected), where condition is, only given single person is not infected.
+    pool_negative_given_not_infected = 1 - pool_positive_given_not_infected
+
+    // P( infected | pool tests positive) = P( pool tests positive | infected)*P(infected) / P(pool tests positive)
+    //  = Sensitivity * infection_rate /
+    //  [ P( pool positive | infected)*P(infected) + P(pool positive | not infected)*P(not infected)]
+    infected_given_pool_positive = sensitivity*infection_rate /
+                                   (sensitivity*infection_rate + pool_positive_given_not_infected*(1-infection_rate))
+    // P( infected | pool tests positive)
+    not_infected_given_pool_positive = 1 - infected_given_pool_positive
+    // P( positive | pool positive) = P(infected | pool positive)*specificity +
+    //     P(not infected | pool positive)*false_positive_rate
+    positive_given_pool_positive = infected_given_pool_positive*specificity +
+                                   not_infected_given_pool_positive*false_positive_rate
+    negative_given_pool_positive = infected_given_pool_positive*false_negative_rate +
+                                   not_infected_given_pool_positive*specificity
+
+    // P(pool positive) = P(pool positive | pool infected) * P(pool infected)
+    //    + P(pool positive | pool not infected) * P(pool not infected)
+    pool_positive =  sensitivity*pool_infected + false_positive_rate * pool_not_infected
+    pool_negative = 1-pool_positive
+    // P( infected | pool tests negative) = P(infected AND pool negative)/P(pool negative)
+    //   = false_negative_rate/[ P(pool negative | pool infected) * P(pool infected)
+    //      + P(pool negative | pool not infected) * P(pool not infected)]
+    infected_given_pool_negative = false_negative_rate/(false_negative_rate*pool_infected
+      + specificity*pool_not_infected)
+
+
 
 
 
     if (pool.every(d => (d.color === 0))) {
-      // All members of the pool are negative
+      // All members of the pool are not infected
       // Negative
       if (Math.random() < metrics.true_negative_rate) {
         // Tested negative
@@ -329,7 +377,7 @@ function simulate() {
         });
       }
     } else {
-      // At least one positive in pool
+      // At least one infected in pool
       if (Math.random() < metrics.true_positive_rate) {
         // Pool correctly tests positive.
         // Tested positive, so retest
