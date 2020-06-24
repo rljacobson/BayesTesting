@@ -217,7 +217,7 @@ function updateMetrics(){
   let dom_obj = document.querySelector(`#total_cost`);
   dom_obj.innerHTML = '$' + d3.format(",")(metrics.total_cost);
   dom_obj = document.querySelector(`#pooling_total_cost`);
-  dom_obj.innerHTML = '$' + d3.format(",")(spmetrics.total_cost);
+  dom_obj.innerHTML = '$' + d3.format(",")(Math.round(spmetrics.total_cost));
 
 
 }
@@ -246,9 +246,8 @@ function computeMetrics() {
     "true_negative_count"      : people_count * (1.0 - infection_rate) * specificity,
     "false_positive_count"     : people_count * (1.0 - infection_rate) * (1.0 - specificity),
     "false_negative_count"     : people_count * infection_rate * (1.0 - sensitivity),
-    "positive_count"           : Math.round(people_count * infection_rate),
-    "negative_count"           : Math.round(people_count *
-                                            (1.0 - infection_rate)),
+    "positive_count"           : people_count * infection_rate,
+    "negative_count"           : people_count * (1.0 - infection_rate),
     "precision"                : infection_rate * sensitivity /
                                   (infection_rate * sensitivity +
                                   (1.0 - infection_rate) * (1.0 - specificity)),
@@ -301,6 +300,7 @@ function computeMetrics() {
 // Called by computeMetrics();
 function computeSamplePoolingMetrics() {
   let pool_size           = metrics.pool_size;
+  let people_count        = metrics.people_count;
   let sensitivity         = metrics.sensitivity;
   let specificity         = metrics.specificity;
   let infection_rate      = metrics.infection_rate;
@@ -334,12 +334,12 @@ function computeSamplePoolingMetrics() {
    */
   let positive_given_infected = sensitivity**2;
 
-   /*
+   /**
     P(neg | not infected) = ((1 - infection_rate)**(pool_size-1))* spec**2
       + (1-(1 - infection_rate)**(pool_size-1)) * false_negative_rate
       + (1-(1 - infection_rate)**(pool_size-1)) * sensitivity * specificity
 
-   ((1 - infection_rate)**(pool_size-1))* spec        100% (assumed)      spec
+   ((1 - infection_rate)**(pool_size-1))* spec        100%, as pool tested negative
     start ----> pool not infected ----> pool negative ----> not infected ----> neg
       │ (1-(1 - infection_rate)**(pool_size-1))
       ↓         false_neg_rate      100%
@@ -354,7 +354,7 @@ function computeSamplePoolingMetrics() {
       ↓
     negative
    */
-  let negative_given_not_infected =((1 - infection_rate)**(pool_size-1))* specificity**2
+  let negative_given_not_infected =((1 - infection_rate)**(pool_size-1)) * specificity
                                    + (1-(1 - infection_rate)**(pool_size-1)) *
                                       false_negative_rate
                                    + (1-(1 - infection_rate)**(pool_size-1)) *
@@ -416,13 +416,15 @@ function computeSamplePoolingMetrics() {
   // P(negative | pool negative) = 1 by def of sample pooling
   // negative_given_pool_negative = 1;
 
-  let pooling_tests_used = Math.round(metrics.people_count*(pool_positive + 1.0/pool_size));
+  let pooling_tests_used = metrics.people_count*(pool_positive + 1.0/pool_size);
   let pooling_true_positive_rate   = positive_given_infected;
   let pooling_true_negative_rate   = negative_given_not_infected;
-  let pooling_false_positive_rate  = 1 - pooling_true_positive_rate;
-  let pooling_false_negative_rate  = 1 - pooling_true_negative_rate;
-  let pooling_true_positive_count  =   pooling_true_positive_rate*metrics.positive_count;
-  let pooling_true_negative_count  =  pooling_true_negative_rate*metrics.negative_count;
+  let pooling_false_positive_rate  = 1 - pooling_true_negative_rate;
+  let pooling_false_negative_rate  = 1 - pooling_true_positive_rate;
+  let pooling_false_positive_count = people_count*(1 - infection_rate)*pooling_false_positive_rate;
+  let pooling_false_negative_count = people_count * infection_rate * pooling_false_negative_rate;
+  let pooling_true_positive_count  =   pooling_true_positive_rate*people_count * infection_rate ;
+  let pooling_true_negative_count  =  pooling_true_negative_rate*people_count*(1 - infection_rate);
 
 
   spmetrics = {
@@ -443,20 +445,20 @@ function computeSamplePoolingMetrics() {
 
      */
     ////
-    "sensitivity"           : pooling_true_positive_rate,
-    "specificity"           : pooling_true_negative_rate,
-    "positive_count"        : metrics.positive_count,
-    "negative_count"        : metrics.negative_count,
-    "true_positive_rate" : pooling_true_positive_rate, // alias
-    "true_negative_rate" : pooling_true_negative_rate, // alias
-    "true_positive_count"   : pooling_true_positive_count,
-    "true_negative_count"   : pooling_true_negative_count,
-    "false_positive_count"  : metrics.negative_count - pooling_true_negative_count,
-    "false_negative_count"  : metrics.positive_count - pooling_true_positive_count,
-    "precision"             : pooling_true_positive_count /
+    "sensitivity"          : pooling_true_positive_rate,
+    "specificity"          : pooling_true_negative_rate,
+    "positive_count"       : metrics.positive_count,
+    "negative_count"       : metrics.negative_count,
+    "true_positive_rate"   : pooling_true_positive_rate, // alias
+    "true_negative_rate"   : pooling_true_negative_rate, // alias
+    "true_positive_count"  : pooling_true_positive_count,
+    "true_negative_count"  : pooling_true_negative_count,
+    "false_positive_count" : pooling_false_positive_count,
+    "false_negative_count" : pooling_false_negative_count,
+    "precision"            : pooling_true_positive_count /
                               metrics.positive_count,
     "negative_predictive_value": (1.0 - infection_rate) * pooling_true_positive_rate /
-                                 ((1.0 - infection_rate) * pooling_true_positive_rate +
+                                  ((1.0 - infection_rate) * pooling_true_positive_rate +
                                   infection_rate * pooling_false_negative_rate),
     "false_negative_rate" : pooling_false_negative_rate,
     "false_positive_rate" : pooling_false_positive_rate,

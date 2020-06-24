@@ -6,6 +6,7 @@
 
     <link rel="stylesheet" href="bayestesting.css"/>
     <link rel="stylesheet" href="sliders.css"/>
+    <link rel="stylesheet" href="tabs.css"/>
 
     <script type="text/javascript" id="MathJax-script" async
             src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
@@ -354,6 +355,12 @@
     <hr id="pane-separator">
 
     <div id="bottom_pane" class="">
+        <!-- Tab 1 -->
+        <input type="radio" name="tabset" id="naive-tab" aria-controls="Individual Testing" checked>
+        <label for="naive-tab">Individual Testing</label>
+        <!-- Tab 2 -->
+        <input type="radio" name="tabset" id="pooling-tab" aria-controls="Sample Pooling">
+        <label for="pooling-tab">Sample Pooling</label>
 
         <div class="data-metric">
             <div class="data-metric-def">
