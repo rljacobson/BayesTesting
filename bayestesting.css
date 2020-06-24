@@ -48,16 +48,16 @@ body {
 }
 
 #displayAsForm {
-  position: relative;
-  display: block;
+  /*position: relative;*/
   text-align: left;
-  left: 20rem;
+  vertical-align: bottom;
+  /*left: 20rem;*/
   /*top: 3rem;*/
 }
 
 .stats_title {
   font-size: xx-large;
-  margin-top: 2rem;
+  margin-top: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
@@ -134,17 +134,20 @@ dl {
 }
 
 #people_dots_group {
-  text-align: center;
-  vertical-align: center;
-  min-width: 30rem;
-  max-width: 40rem;
-  overflow-wrap: normal;
-  overflow-y: visible;
-  background-color: aliceblue;
+  /*text-align: center;*/
+  /*vertical-align: center;*/
+  /*min-width: 30rem;*/
+  /*max-width: 40rem;*/
+  /*overflow-wrap: normal;*/
+  /*overflow-y: visible;*/
+  /*background-color: aliceblue;*/
+  align-items: flex-end;
+  margin-bottom: 1.4rem;
 }
 
 #people_count_group {
-  font-size: large;
+
+  /*font-size: large;*/
   text-align: center;
   vertical-align: top;
   display: inline-block;
@@ -159,7 +162,8 @@ dl {
 }
 
 #people_count_slider{
-  font-size: large;
+  font-size: larger;
+  max-width: 12rem;
 }
 
 #graph_group {
@@ -181,6 +185,18 @@ dl {
 
 }
 
+#github-badges{
+  white-space: nowrap;
+  display: inline-block;
+  margin: 0;
+  /*width: 100vw;*/
+  /*text-align: right;*/
+  float: right;
+}
+
+#page-heading{
+  margin-top:0;
+}
 
 /* slider css  */
 
@@ -194,7 +210,7 @@ dl {
   width: 30rem;
 }
 
-#slider-group {
+.slider-group {
   margin-top: -1rem;
   margin-bottom: 1rem;
 }

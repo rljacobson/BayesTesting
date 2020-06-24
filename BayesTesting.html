@@ -16,8 +16,14 @@
     </script>
 </head>
 <body>
+<p id="github-badges">
+    <a href="https://github.com/rljacobson/BayesTesting/network/"><img src="https://camo.githubusercontent.com/115a189add8f7c0b07aabe7c86f328eecee68564/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f666f726b732f726c6a61636f62736f6e2f426179657354657374696e672e7376673f7374796c653d736f6369616c266c6162656c3d466f726b266d61784167653d32353932303030" alt="GitHub forks" data-canonical-src="https://img.shields.io/github/forks/rljacobson/BayesTesting.svg?style=social&amp;label=Fork&amp;maxAge=2592000" style="max-width:100%;"></a>
+    <a href="https://github.com/rljacobson/BayesTesting/stargazers/"><img src="https://camo.githubusercontent.com/59ff96b5db0db5f440dece35bbc22e757557d18a/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f73746172732f726c6a61636f62736f6e2f426179657354657374696e672e7376673f7374796c653d736f6369616c266c6162656c3d53746172266d61784167653d32353932303030" alt="GitHub stars" data-canonical-src="https://img.shields.io/github/stars/rljacobson/BayesTesting.svg?style=social&amp;label=Star&amp;maxAge=2592000" style="max-width:100%;"></a>
+    <a href="https://github.com/rljacobson/BayesTesting/watchers/"><img src="https://camo.githubusercontent.com/c4a95f8295a39056927edc7eec5a9d1b341453be/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f77617463686572732f726c6a61636f62736f6e2f426179657354657374696e672e7376673f7374796c653d736f6369616c266c6162656c3d5761746368266d61784167653d32353932303030" alt="GitHub watchers" data-canonical-src="https://img.shields.io/github/watchers/rljacobson/BayesTesting.svg?style=social&amp;label=Watch&amp;maxAge=2592000" style="max-width:100%;"></a>
+    <a href="https://github.com/rljacobson?tab=followers"><img src="https://camo.githubusercontent.com/c48b0d33bd59711449b85b7283e2057971c260e7/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f666f6c6c6f776572732f726c6a61636f62736f6e2e7376673f7374796c653d736f6369616c266c6162656c3d466f6c6c6f77266d61784167653d32353932303030" alt="GitHub followers" data-canonical-src="https://img.shields.io/github/followers/rljacobson.svg?style=social&amp;label=Follow&amp;maxAge=2592000" style="max-width:100%;"></a>
+</p>
+<h1 id="page-heading">Comparison Between Naïve Testing and Sample Pooling for Whole Populations</h1>
 
-<h1>Comparison Between Naïve Testing and Sample Pooling for Whole Populations</h1>
 
 <div id="center_content">
     <div id="top_pane" class="row-container">
@@ -35,42 +41,40 @@
                     <div id="people_count" class="slider-labels">2500</div>
                 </div-->
             </div>
-            <div id="people_dots" class="column-item">
-            </div>
-
-            <form action="#" id="slider-group" class="column-item">
-                <div id="displayAsForm"><input type="radio" name="displayAsRadio" id="Cluster"
-                                               value="Cluster"
-                                               checked>
+            <div id="people_dots_group" class="column-item row-container">
+                <div id="people_dots" class="row-item"></div>
+                <div id="displayAsForm" class="row-item">
+                    <input type="radio" name="displayAsRadio" id="Cluster"
+                           value="Cluster"
+                           checked>
                     <label for="Cluster">Cluster</label><br>
                     <input type="radio" name="displayAsRadio" id="Grid" value="Grid">
                     <label for="Grid">Grid</label>
                 </div>
+            </div>
+            <div class="data-metric">
+                <div class="data-metric-def">
+                    <dl>
+                        <dt>infected / condition positive (P)</dt>
+                        <dd>the number of real cases of infection</dd>
+                    </dl>
+                </div>
+                <div class="answer-equals">$$=$$</div>
+                <div id="positive_count" class="answer-value"></div>
+            </div>
+            <div class="data-metric">
+                <div class="data-metric-def">
+                    <dl>
+                        <dt>not infected / condition negative (N)</dt>
+                        <dd>the number of actually uninfected people</dd>
+                    </dl>
+                </div>
+                <div class="answer-equals">$$=$$</div>
+                <div id="negative_count" class="answer-value"></div>
 
-                <label class="slider-labels" for="true_positive_rate_slider">
-                    Sensitivity (True Positive Rate): </label>
-                <output for="true_positive_rate_slider" id="true_positive_rate"
-                        class="slider-labels">41.00%
-                </output>
-                <br>
-                <input type="range"
-                       id="true_positive_rate_slider" class="slider-widget" min="0.0"
-                       max="1.0" step="any" value="0.41" oninput="sliderUpdate(value,
-                   '#true_positive_rate')"/><br>
+            </div>
 
-                <label class="slider-labels" for="true_negative_rate_slider">
-                    Specificity (True Negative Rate):
-                </label>
-                <output for="true_negative_rate_slider" id="true_negative_rate"
-                        class="slider-labels">
-                    94.00%
-                </output>
-                <br>
-                <input type="range"
-                       id="true_negative_rate_slider" class="slider-widget" min="0.30"
-                       max="1.0" step="any" value="0.94"
-                       oninput="sliderUpdate(value, '#true_negative_rate')"/><br>
-
+            <div class="slider-group column-item">
                 <label class="slider-labels" for="infection_rate_slider">
                     Infection Rate:
                 </label>
@@ -81,12 +85,33 @@
                        id="infection_rate_slider" class="slider-widget" min="0.0"
                        max="0.2" step="any" value="0.05" oninput="sliderUpdate(value,
                    '#infection_rate')"/>
-            </form>
+            </div>
         </div>
 
         <div id="naive-testing" class="row-item column-container">
-            <div class="stats_title column-item">Naïve Testing</div>
+            <div class="stats_title column-item">Individual Testing</div>
             <div class="stats_subtitle column-item">Expected Values</div>
+            <div class="data-metric">
+                <div class="data-metric-def">
+                    <dl>
+                        <dt>Total Cost</dt>
+                        <dd>at $22 per test</dd>
+                    </dl>
+                </div>
+                <div class="answer-equals">$$=$$</div>
+                <div id="total_cost" class="answer-value"></div>
+            </div>
+            <div class="data-metric">
+                <div class="data-metric-def">
+                    <dl>
+                        <dt>Tests Used</dt>
+                        <dd>each person tested separately</dd>
+                    </dl>
+                </div>
+                <div class="answer-equals">$$=$$</div>
+                <div id="tests_used" class="answer-value"></div>
+            </div>
+            <hr class="row-line">
             <div class="data-metric">
                 <div class="data-metric-def">
                     <dl>
@@ -178,36 +203,59 @@
                 <div class="answer-equals">$$=$$</div>
                 <div id="specificity" class="answer-value"></div>
             </div>
-            <hr class="row-line">
-            <div class="data-metric">
 
+            <div class="slider-group column-item">
+                <label class="slider-labels" for="true_positive_rate_slider">
+                    Sensitivity (True Positive Rate): </label>
+                <output for="true_positive_rate_slider" id="true_positive_rate"
+                        class="slider-labels">41.00%
+                </output>
+                <br>
+                <input type="range"
+                       id="true_positive_rate_slider" class="slider-widget" min="0.0"
+                       max="1.0" step="any" value="0.41" oninput="sliderUpdate(value,
+                       '#true_positive_rate')"/><br>
 
-                <div class="data-metric-def">
-                    <dl>
-                        <dt>condition positive (P)</dt>
-                        <dd>the number of real positive cases in the data</dd>
-                    </dl>
-                </div>
-                <div class="answer-equals">$$=$$</div>
-                <div id="positive_count" class="answer-value"></div>
+                <label class="slider-labels" for="true_negative_rate_slider">
+                    Specificity (True Negative Rate):
+                </label>
+                <output for="true_negative_rate_slider" id="true_negative_rate"
+                        class="slider-labels">
+                    94.00%
+                </output>
+                <br>
+                <input type="range"
+                       id="true_negative_rate_slider" class="slider-widget" min="0.30"
+                       max="1.0" step="any" value="0.94"
+                       oninput="sliderUpdate(value, '#true_negative_rate')"/><br>
             </div>
-            <div class="data-metric">
-                <div class="data-metric-def">
-                    <dl>
-                        <dt>condition negative (N)</dt>
-                        <dd>the number of real negative cases in the data</dd>
-                    </dl>
-                </div>
-                <div class="answer-equals">$$=$$</div>
-                <div id="negative_count" class="answer-value"></div>
 
-            </div>
-                <hr class="row-line">
         </div>
 
         <div id="pooling-testing" class="row-item column-container">
             <div class="stats_title column-item">Sample Pooling</div>
             <div class="stats_subtitle column-item">Expected Values</div>
+            <div class="data-metric">
+                <div class="data-metric-def">
+                    <dl>
+                        <dt>Total Cost</dt>
+                        <dd>at $22 per test</dd>
+                    </dl>
+                </div>
+                <div class="answer-equals">$$=$$</div>
+                <div id="pooling_total_cost" class="answer-value"></div>
+            </div>
+            <div class="data-metric">
+                <div class="data-metric-def">
+                    <dl>
+                        <dt>Tests Used</dt>
+                        <dd>pools and retests</dd>
+                    </dl>
+                </div>
+                <div class="answer-equals">$$=$$</div>
+                <div id="pooling_tests_used" class="answer-value"></div>
+            </div>
+            <hr class="row-line">
             <div class="data-metric">
                 <div class="data-metric-def">
                     <dl>
@@ -258,13 +306,7 @@
             <div class="data-metric">
                 <div class="data-metric-def">
                     <dl>
-                        <dt><a href="https://en.wikipedia.org/wiki/Sensitivity_(test)"
-                               title="Sensitivity (test)">sensitivity, </a><a
-                                href="https://en.wikipedia.org/wiki/Precision_and_recall#Recall"
-                                title="Precision and recall"> recall, </a><a
-                                href="https://en.wikipedia.org/wiki/Hit_rate" title="Hit rate"> hit
-                            rate </a>or <a href="https://en.wikipedia.org/wiki/Sensitivity_(test)"
-                                           title="Sensitivity (test)">true positive rate</a> (TPR)
+                        <dt>effective sensitivity / true positive rate (TPR)
                         </dt>
                         <dd>$$\mathrm {TPR} ={\frac {\mathrm {TP} }{\mathrm {P} }}={\frac {\mathrm
                             {TP}
@@ -278,12 +320,7 @@
             <div class="data-metric">
                 <div class="data-metric-def">
                     <dl>
-                        <dt><a href="https://en.wikipedia.org/wiki/Specificity_(tests)"
-                               title="Specificity (tests)">specificity, </a><a
-                                href="https://en.wikipedia.org/wiki/Specificity_(tests)"
-                                title="Specificity (tests)">selectivity,</a> or <a
-                                href="https://en.wikipedia.org/wiki/Specificity_(tests)"
-                                title="Specificity (tests)">true negative rate</a> (TNR)
+                        <dt>effective specificity / true negative rate (TNR)
                         </dt>
                         <dd>$$\mathrm {TNR} ={\frac {\mathrm {TN} }{\mathrm {N} }}={\frac {\mathrm
                             {TN}
@@ -295,38 +332,21 @@
                 <div id="pooling_specificity" class="answer-value"></div>
             </div>
 
-                <hr class="row-line">
-
-            <div class="data-metric">
-                <div class="data-metric-def">
-                    <p style="font-weight: bold">Pool Size</p>
-                </div>
-                <div class="answer-equals">$$=$$</div>
-                <div id="pool_size" class="answer-value"></div>
-            </div>
-            <div class="data-metric">
-
-                <div class="data-metric-def">
-                    <dl>
-                        <dt>Tests Used</dt>
-                        <dd>pools and retests</dd>
-                    </dl>
-                </div>
-                <div class="answer-equals">$$=$$</div>
-                <div id="pooling_tests_used" class="answer-value"></div>
-            </div>
             <hr class="row-line">
-            <div class="data-metric">
 
-                <div class="data-metric-def">
-                    <dl>
-                        <dt>Precision</dt>
-                        <dd>positive predictive value</dd>
-                    </dl>
-                </div>
-                <div class="answer-equals">$$=$$</div>
-                <div id="pooling_precision" class="answer-value"></div>
+            <div class="slider-group column-item">
+                <label class="slider-labels" for="pool_size_slider">
+                    Pool Size: </label>
+                <output for="pool_size_slider" id="pool_size"
+                        class="slider-labels">25
+                </output>
+                <br>
+                <input type="range"
+                       id="pool_size_slider" class="slider-widget" min="1"
+                       max="40" step="1" value="25" oninput="sliderUpdate(value, '#pool_size')"/>
             </div>
+
+
         </div>
 
     </div>

@@ -4,6 +4,7 @@
 // Constants
 const ANIMATION_INTERVAL = 1000;
 const POOL_SIZE = 30;
+const COST_PER_TEST = 22;
 let metrics;
 let spmetrics;
 let people;
@@ -140,7 +141,7 @@ function sliderUpdate(val, valueLabel) {
 
 function updateMetrics(){
 
-  percentages = [
+  let percentages = [
     'sensitivity',
     'true_positive_rate',
     'true_negative_rate',
@@ -166,7 +167,7 @@ function updateMetrics(){
     'markedness',
     'precision'
   ];
-  integers = [
+  let integers = [
     'true_positive_count',
     'true_negative_count',
     'false_positive_count',
@@ -175,8 +176,8 @@ function updateMetrics(){
     'negative_count',
     'people_count',
     'pool_size',
-    'tests_used'
-  ]
+    'tests_used',
+  ];
 
   // Naive metrics
   for (const property in metrics){
@@ -212,6 +213,12 @@ function updateMetrics(){
     }
   }
 
+  // costs
+  let dom_obj = document.querySelector(`#total_cost`);
+  dom_obj.innerHTML = '$' + d3.format(",")(metrics.total_cost);
+  dom_obj = document.querySelector(`#pooling_total_cost`);
+  dom_obj.innerHTML = '$' + d3.format(",")(spmetrics.total_cost);
+
 
 }
 
@@ -223,11 +230,14 @@ function computeMetrics() {
   let true_negative_rate = specificity;
   let infection_rate = Number(document.querySelector('#infection_rate_slider').value);
   let people_count = Number(document.querySelector('#people_count_slider').value);
+  let pool_size = Number(document.querySelector('#pool_size_slider').value);
 
-  updated_values = {
-    "pool_size"                : POOL_SIZE,
+  let updated_values = {
+    "pool_size"                : pool_size,
     "infection_rate"           : infection_rate,
     "people_count"             : people_count,
+    "tests_used"               : people_count,
+    "total_cost"               : people_count*COST_PER_TEST,
     "sensitivity"              : sensitivity,
     "specificity"              : specificity,
     "true_positive_rate"       : true_positive_rate,
@@ -290,7 +300,7 @@ function computeMetrics() {
 
 // Called by computeMetrics();
 function computeSamplePoolingMetrics() {
-  let pool_size           = POOL_SIZE;
+  let pool_size           = metrics.pool_size;
   let sensitivity         = metrics.sensitivity;
   let specificity         = metrics.specificity;
   let infection_rate      = metrics.infection_rate;
@@ -406,12 +416,12 @@ function computeSamplePoolingMetrics() {
   // P(negative | pool negative) = 1 by def of sample pooling
   // negative_given_pool_negative = 1;
 
-  let pooling_tests_used = metrics.people_count*(pool_positive + 1.0/pool_size);
+  let pooling_tests_used = Math.round(metrics.people_count*(pool_positive + 1.0/pool_size));
   let pooling_true_positive_rate   = positive_given_infected;
   let pooling_true_negative_rate   = negative_given_not_infected;
   let pooling_false_positive_rate  = 1 - pooling_true_positive_rate;
   let pooling_false_negative_rate  = 1 - pooling_true_negative_rate;
-  let pooling_true_positive_count =   pooling_true_positive_rate*metrics.positive_count;
+  let pooling_true_positive_count  =   pooling_true_positive_rate*metrics.positive_count;
   let pooling_true_negative_count  =  pooling_true_negative_rate*metrics.negative_count;
 
 
@@ -451,6 +461,7 @@ function computeSamplePoolingMetrics() {
     "false_negative_rate" : pooling_false_negative_rate,
     "false_positive_rate" : pooling_false_positive_rate,
     "tests_used" : pooling_tests_used,
+    "total_cost" : pooling_tests_used*COST_PER_TEST,
   };
 
 
