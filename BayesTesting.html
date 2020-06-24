@@ -76,7 +76,8 @@
         </div>
 
         <div id="naive-testing" class="row-item column-container">
-            <p class="stats_title column-item">Naïve Testing</p>
+            <div class="stats_title column-item">Naïve Testing</div>
+            <div class="stats_subtitle column-item">Expected Values</div>
             <table class="wikitable">
                 <tbody>
                 <tr>
@@ -224,8 +225,9 @@
         </table>
         </div>
 
-        <div id="simulated-testing" class="row-item column-container">
-            <p class="stats_title column-item">Simulated Test Pooling</p>
+        <div id="pooling-testing" class="row-item column-container">
+            <div class="stats_title column-item">Sample Pooling</div>
+            <div class="stats_subtitle column-item">Expected Values</div>
             <table class="wikitable">
                 <tbody>
                 <tr>
@@ -236,7 +238,7 @@
                         </dl>
                     </td>
                     <td class="answer-equals">$$=$$</td>
-                    <td id="simulated_true_positive" class="answer-value"></td>
+                    <td id="pooling_true_positive_count" class="answer-value"></td>
                 </tr>
                 </tbody>
             </table>
@@ -250,7 +252,7 @@
                         </dl>
                     </td>
                     <td class="answer-equals">$$=$$</td>
-                    <td id="simulated_true_negative" class="answer-value"></td>
+                    <td id="pooling_true_negative_count" class="answer-value"></td>
                 </tr>
                 </tbody>
             </table>
@@ -267,7 +269,7 @@
                         </dl>
                     </td>
                     <td class="answer-equals">$$=$$</td>
-                    <td id="simulated_false_positive" class="answer-value"></td>
+                    <td id="pooling_false_positive_count" class="answer-value"></td>
                 </tr>
                 </tbody>
             </table>
@@ -282,7 +284,7 @@
                         </dl>
                     </td>
                     <td class="answer-equals">$$=$$</td>
-                    <td id="simulated_false_negative" class="answer-value"></td>
+                    <td id="pooling_false_negative_count" class="answer-value"></td>
                 </tr>
                 <tr class="row-line"></tr>
                 </tbody>
@@ -307,7 +309,7 @@
                         </dl>
                     </td>
                     <td class="answer-equals">$$=$$</td>
-                    <td id="effective_simulated_sensitivity" class="answer-value"></td>
+                    <td id="pooling_sensitivity" class="answer-value"></td>
                 </tr>
                 </tbody>
             </table>
@@ -330,7 +332,7 @@
                         </dl>
                     </td>
                     <td class="answer-equals">$$=$$</td>
-                    <td id="effective_simulated_specificity" class="answer-value"></td>
+                    <td id="pooling_specificity" class="answer-value"></td>
                 </tr>
 
                 <tr class="row-line"></tr>
@@ -349,13 +351,23 @@
                     <td>
                         <dl>
                             <dt>Tests Used</dt>
-                            <dd>pooled and retests</dd>
+                            <dd>pools and retests</dd>
                         </dl>
                     </td>
                     <td class="answer-equals">$$=$$</td>
-                    <td id="simulated_tests_used" class="answer-value"></td>
+                    <td id="pooling_tests_used" class="answer-value"></td>
                 </tr>
                 <tr class="row-line"></tr>
+                <tr>
+                    <td>
+                        <dl>
+                            <dt>Precision</dt>
+                            <dd>positive predictive value</dd>
+                        </dl>
+                    </td>
+                    <td class="answer-equals">$$=$$</td>
+                    <td id="pooling_precision" class="answer-value"></td>
+                </tr>
                 </tbody>
             </table>
         </div>

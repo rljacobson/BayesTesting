@@ -46,6 +46,13 @@ hr {
 
 .stats_title {
   font-size: xx-large;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.stats_subtitle {
+  font-size: x-large;
+  margin-bottom: 1rem;
 }
 
 table caption {

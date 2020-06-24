@@ -2,15 +2,16 @@
 /*---------------------UI Constants---------------------*/
 
 // Constants
-const SIMULATION_INTERVAL = 1000;
+const ANIMATION_INTERVAL = 1000;
 const POOL_SIZE = 30;
 let metrics;
+let spmetrics;
 let people;
 const n = 50;
 const people_count = n*n;
-let continueSimulation = false;
+let continueAnimation = false;
 let peopleChanged = false;
-const SIMULATIONINTERVAL = window.setInterval(simulationIntervalHandler, SIMULATION_INTERVAL);
+const ANIMATIONINTERVAL = window.setInterval(animationIntervalHandler, ANIMATION_INTERVAL);
 
 
 /*---------------------Graphics Constants---------------------*/
@@ -77,7 +78,7 @@ function makeGraphic(){
                   .join("circle")
                   .attr("transform", d => `translate(${x(d.x + 1)},${y(d.y + 1)})`)
                   .attr("r", d => d.data.size)
-                  .attr("fill-opacity", 0.8)
+                  // .attr("fill-opacity", 0.8)
                   .attr("fill", d => color(d.data.color));
 
 
@@ -96,19 +97,21 @@ function updateColors(){
 
 /*---------------------End Graphics---------------------*/
 
-function simulationIntervalHandler(){
-  if(continueSimulation){
-    continueSimulation = false;
-    computeMetrics();
+
+function animationIntervalHandler(){
+  if(continueAnimation){
+    continueAnimation = false;
+    // computeMetrics();
     if(peopleChanged){
       updatePeople();
       updateColors();
       peopleChanged = false;
     }
-    simulate();
-    updateMetrics();
+    // simulate();
+    // updateMetrics();
   }
 }
+
 
 function getRandomSample(array, count) {
   let indices = [];
@@ -132,7 +135,7 @@ function sliderUpdate(val, valueLabel) {
   }
   computeMetrics();
   updateMetrics();
-  continueSimulation = true;
+  continueAnimation = true;
 }
 
 function updateMetrics(){
@@ -161,6 +164,7 @@ function updateMetrics(){
     // 'fowlkes_mallows_index',
     'informedness',
     'markedness',
+    'precision'
   ];
   integers = [
     'true_positive_count',
@@ -171,14 +175,10 @@ function updateMetrics(){
     'negative_count',
     'people_count',
     'pool_size',
-    'simulated_false_positive',
-    'simulated_false_negative',
-    'simulated_true_positive',
-    'simulated_true_negative',
-    'simulated_tests_used',
+    'tests_used'
   ]
 
-
+  // Naive metrics
   for (const property in metrics){
     let value = metrics[property];
     let dom_obj = document.querySelector(`#${property}`);
@@ -194,6 +194,25 @@ function updateMetrics(){
       console.log(`The selector #${property} is ${document.querySelector('#'+property)}.`);
     }
   }
+
+  // Sample Pooling metrics
+  for (const property in spmetrics){
+    let value = spmetrics[property];
+    let dom_obj = document.querySelector(`#pooling_${property}`);
+    if(dom_obj){
+      if(percentages.includes(property)){
+        dom_obj.innerHTML = `${(value * 100).toFixed(2)}%`;
+      } else if (integers.includes(property)){
+        dom_obj.innerHTML = `${Math.round(value)}`;
+      } else{
+        dom_obj.innerHTML = value.toFixed(4);
+      }
+    } else{
+      console.log(`The selector #pooling_${property} is ${document.querySelector('#pooling_'+property)}.`);
+    }
+  }
+
+
 }
 
 function computeMetrics() {
@@ -266,167 +285,175 @@ function computeMetrics() {
   metrics["informedness"] = sensitivity + specificity - 1.0;
   metrics["markedness"] = metrics["precision"] + metrics["negative_predictive_value"] - 1;
 
-  // metrics['effective_simulated_sensitivity'] =
-  //         (
-  //             metrics.simulated_true_positive / metrics.positive_count
-  //         ) * 100;
-  //
-  // metrics['effective_simulated_specificity'] =
-  //         (
-  //             metrics.simulated_true_negative / metrics.negative_count
-  //         ) * 100;
-
-  // return metrics;
+  computeSamplePoolingMetrics();
 }
 
-function simulate() {
-  let pool_size       = POOL_SIZE;
-  let start           = 0;
-  let true_negatives  = 0;
-  let true_positives  = 0;
-  let false_negatives = 0;
-  let false_positives = 0;
-  let tests           = 0;
+// Called by computeMetrics();
+function computeSamplePoolingMetrics() {
+  let pool_size           = POOL_SIZE;
+  let sensitivity         = metrics.sensitivity;
+  let specificity         = metrics.specificity;
+  let infection_rate      = metrics.infection_rate;
+  let false_positive_rate = metrics.false_positive_rate;
+  let false_negative_rate = metrics.false_negative_rate;
 
-  while (start < people.length) {
-    let pool = people.slice(start, start + pool_size);
+  /*
+    We assume pooling doesn't affect sensitivity and specificity. Though this is unlikely for most testing
+     contexts, it is approximately correct with qPCR diagnostic methods.
 
-    tests++; // One test for the pool.
+  */
 
+  /**
+    Ultimately want P(pos | infected) and P(neg | not infected)
+
+    P(pos | infected) = sensitivity^2
+
+      start --X-->pool not infected
+      │ 100% (assumed)
+      ↓
+      pool infected ----> pool negative
+      │ sensitivity
+      ↓
+      pool positive--X--> not infected
+      │ 100% (assumed)
+      ↓
+      infected
+      │ sensitivity
+      ↓
+      positive
+   */
+  let positive_given_infected = sensitivity**2;
+
+   /*
+    P(neg | not infected) = ((1 - infection_rate)**(pool_size-1))* spec**2
+      + (1-(1 - infection_rate)**(pool_size-1)) * false_negative_rate
+      + (1-(1 - infection_rate)**(pool_size-1)) * sensitivity * specificity
+
+   ((1 - infection_rate)**(pool_size-1))* spec        100% (assumed)      spec
+    start ----> pool not infected ----> pool negative ----> not infected ----> neg
+      │ (1-(1 - infection_rate)**(pool_size-1))
+      ↓         false_neg_rate      100%
+    pool infected ----> pool negative ----> negative
+      │ sensitivity
+      ↓
+    pool positive
+      │ 100% assumed
+      ↓
+    not infected
+      │ specificity
+      ↓
+    negative
+   */
+  let negative_given_not_infected =((1 - infection_rate)**(pool_size-1))* specificity**2
+                                   + (1-(1 - infection_rate)**(pool_size-1)) *
+                                      false_negative_rate
+                                   + (1-(1 - infection_rate)**(pool_size-1)) *
+                                   sensitivity * specificity;
+
+
+
+        // P(no infected in pool) = P(not infected)^pool_size
+  let pool_not_infected = (1 - infection_rate)**pool_size;
+  let pool_infected     = 1 - pool_not_infected;
+  /*
+  // P(infected | pool_infected) = P(infected and pool infected)/P(pool infected)
+  // = P(infected)/P(pool_infected)
+  infected_given_pool_infected = infection_rate / pool_infected;
+
+  //needed?
+  not_infected_given_pool_infected = 1 - infected_given_pool_infected;
+
+
+  // P(pool positive | not infected), where the condition is, only the given single person is not infected.
+  // Two cases: at least one of the other people is infected, or none of the others are infected.
+  // P(pool positive | not infected) = P(pool positive | pool not infected) * P(pool not infected | not infected)
+  // + P(pool positive | pool infected) * P(pool infected | not infected)
+  // = false_positive_rate * (1 - infection_rate)**(pool_size-1) + sensitivity* [1 - (1 - infection_rate)**(pool_size-1)]
+  pool_positive_given_not_infected = false_positive_rate*(1 - infection_rate)**(pool_size-1) +
+                                     sensitivity* (1 - (1 - infection_rate)**(pool_size-1));
+  // P(pool positive | infected) = P(pool positive | pool infected) = sensitivity
+
+  // P(pool negative | not infected), where condition is, only given single person is not infected.
+  pool_negative_given_not_infected = 1 - pool_positive_given_not_infected
+
+  // P( infected | pool tests positive) = P( pool tests positive | infected)*P(infected) / P(pool tests positive)
+  //  = Sensitivity * infection_rate /
+  //  [ P( pool positive | infected)*P(infected) + P(pool positive | not infected)*P(not infected)]
+  infected_given_pool_positive = sensitivity*infection_rate /
+                                 (sensitivity*infection_rate + pool_positive_given_not_infected*(1-infection_rate));
+  // P( infected | pool tests positive)
+  not_infected_given_pool_positive = 1 - infected_given_pool_positive;
+  // P( positive | pool positive) = P(infected | pool positive)*specificity +
+  //     P(not infected | pool positive)*false_positive_rate
+  positive_given_pool_positive = infected_given_pool_positive*specificity +
+                                 not_infected_given_pool_positive*false_positive_rate;
+  negative_given_pool_positive = infected_given_pool_positive*false_negative_rate +
+                                 not_infected_given_pool_positive*specificity;
+
+  // P(pool positive) = P(pool positive | pool infected) * P(pool infected)
+  //    + P(pool positive | pool not infected) * P(pool not infected)
+
+ */
+
+  let pool_positive =  sensitivity*pool_infected + false_positive_rate * pool_not_infected;
+
+  // pool_negative = 1-pool_positive;
+  // P( infected | pool tests negative) = P(infected AND pool negative)/P(pool negative)
+  //   = false_negative_rate/[ P(pool negative | pool infected) * P(pool infected)
+  //      + P(pool negative | pool not infected) * P(pool not infected)]
+  //// infected_given_pool_negative = false_negative_rate/(false_negative_rate*pool_infected
+  ////    + specificity*pool_not_infected);
+  // P(negative | pool negative) = 1 by def of sample pooling
+  // negative_given_pool_negative = 1;
+
+  let pooling_tests_used = metrics.people_count*(pool_positive + 1.0/pool_size);
+  let pooling_true_positive_rate   = positive_given_infected;
+  let pooling_true_negative_rate   = negative_given_not_infected;
+  let pooling_false_positive_rate  = 1 - pooling_true_positive_rate;
+  let pooling_false_negative_rate  = 1 - pooling_true_negative_rate;
+  let pooling_true_positive_count =   pooling_true_positive_rate*metrics.positive_count;
+  let pooling_true_negative_count  =  pooling_true_negative_rate*metrics.negative_count;
+
+
+  spmetrics = {
     /*
-      We assume pooling doesn't affect sensitivity and specificity. Though this is unlikely for most testing
-       contexts, it is approximately correct with qPCR diagnostic methods.
+    'pool_not_infected' :pool_not_infected,
+    'pool_infected': pool_infected,
+    'pool_positive_given_not_infected' : pool_positive_given_not_infected,
+    'infected_given_pool_positive' : infected_given_pool_positive,
+    'not_infected_given_pool_positive': not_infected_given_pool_positive,
+    'positive_given_pool_positive' : positive_given_pool_positive,
+    'negative_given_pool_positive' : negative_given_pool_positive,
+    'pool_positive' : pool_positive,
+    'pool_negative': pool_negative,
+    'negative_given_pool_negative' : 1,
+    'not_infected_given_pool_infected': not_infected_given_pool_infected,
+    'infected_given_pool_infected': infected_given_pool_infected,
+    'pool_negative_given_not_infected': pool_negative_given_not_infected,
 
      */
-
-    // P(no infected in pool) = P(not infected)^pool_size
-    pool_not_infected = (1 - infection_rate)^pool_size;
-    pool_infected = 1 - pool_not_infected;
-    // P(infected | pool_infected) = P(infected and pool infected)/P(pool infected)
-    // = P(infected)/P(pool_infected)
-    infected_given_pool_infected = infection_rate / pool_infected;
-
-    //needed?
-    not_infected_given_pool_infected = 1 - infected_given_pool_infected;
-
-
-
-
-    // P(pool positive | not infected), where the condition is, only the given single person is not infected.
-    // Two cases: at least one of the other people is infected, or none of the others are infected.
-    // P(pool positive | not infected) = P(pool positive | pool not infected) * P(pool not infected | not infected)
-    // + P(pool positive | pool infected) * P(pool infected | not infected)
-    // = false_positive_rate * (1 - infection_rate)^(pool_size-1) + sensitivity* [1 - (1 - infection_rate)^(pool_size-1)]
-    pool_positive_given_not_infected = false_positive_rate*(1 - infection_rate)^(pool_size-1) +
-                                       sensitivity* [1 - (1 - infection_rate)^(pool_size-1)]
-    // P(pool positive | infected) = P(pool positive | pool infected) = sensitivity
-
-    // P(pool negative | not infected), where condition is, only given single person is not infected.
-    pool_negative_given_not_infected = 1 - pool_positive_given_not_infected
-
-    // P( infected | pool tests positive) = P( pool tests positive | infected)*P(infected) / P(pool tests positive)
-    //  = Sensitivity * infection_rate /
-    //  [ P( pool positive | infected)*P(infected) + P(pool positive | not infected)*P(not infected)]
-    infected_given_pool_positive = sensitivity*infection_rate /
-                                   (sensitivity*infection_rate + pool_positive_given_not_infected*(1-infection_rate))
-    // P( infected | pool tests positive)
-    not_infected_given_pool_positive = 1 - infected_given_pool_positive
-    // P( positive | pool positive) = P(infected | pool positive)*specificity +
-    //     P(not infected | pool positive)*false_positive_rate
-    positive_given_pool_positive = infected_given_pool_positive*specificity +
-                                   not_infected_given_pool_positive*false_positive_rate
-    negative_given_pool_positive = infected_given_pool_positive*false_negative_rate +
-                                   not_infected_given_pool_positive*specificity
-
-    // P(pool positive) = P(pool positive | pool infected) * P(pool infected)
-    //    + P(pool positive | pool not infected) * P(pool not infected)
-    pool_positive =  sensitivity*pool_infected + false_positive_rate * pool_not_infected
-    pool_negative = 1-pool_positive
-    // P( infected | pool tests negative) = P(infected AND pool negative)/P(pool negative)
-    //   = false_negative_rate/[ P(pool negative | pool infected) * P(pool infected)
-    //      + P(pool negative | pool not infected) * P(pool not infected)]
-    infected_given_pool_negative = false_negative_rate/(false_negative_rate*pool_infected
-      + specificity*pool_not_infected)
+    ////
+    "sensitivity"           : pooling_true_positive_rate,
+    "specificity"           : pooling_true_negative_rate,
+    "positive_count"        : metrics.positive_count,
+    "negative_count"        : metrics.negative_count,
+    "true_positive_rate" : pooling_true_positive_rate, // alias
+    "true_negative_rate" : pooling_true_negative_rate, // alias
+    "true_positive_count"   : pooling_true_positive_count,
+    "true_negative_count"   : pooling_true_negative_count,
+    "false_positive_count"  : metrics.negative_count - pooling_true_negative_count,
+    "false_negative_count"  : metrics.positive_count - pooling_true_positive_count,
+    "precision"             : pooling_true_positive_count /
+                              metrics.positive_count,
+    "negative_predictive_value": (1.0 - infection_rate) * pooling_true_positive_rate /
+                                 ((1.0 - infection_rate) * pooling_true_positive_rate +
+                                  infection_rate * pooling_false_negative_rate),
+    "false_negative_rate" : pooling_false_negative_rate,
+    "false_positive_rate" : pooling_false_positive_rate,
+    "tests_used" : pooling_tests_used,
+  };
 
 
-
-
-
-    if (pool.every(d => (d.color === 0))) {
-      // All members of the pool are not infected
-      // Negative
-      if (Math.random() < metrics.true_negative_rate) {
-        // Tested negative
-        pool.forEach(d => {
-          d.test_result = 0;
-        });
-        true_negatives += pool.length;
-      } else {
-        // Tested positive, so retest
-        tests += pool.length;
-        pool.forEach(d => {
-          if (Math.random() < metrics.true_negative_rate) {
-            // True negative
-            d.test_result = false;
-            true_negatives++;
-          } else {
-            // A false positive.
-            d.test_result = true;
-            false_positives++;
-          }
-        });
-      }
-    } else {
-      // At least one infected in pool
-      if (Math.random() < metrics.true_positive_rate) {
-        // Pool correctly tests positive.
-        // Tested positive, so retest
-        tests += pool.length;
-        pool.forEach(d => {
-          // Four cases
-          if ((d.color === 0) && (Math.random() < metrics.true_negative_rate)) {
-            // True negative
-            d.test_result = false;
-            true_negatives++;
-          } else if( (d.color === 0)  && (Math.random() >= metrics.true_negative_rate)){
-            // A false positive.
-            d.test_result = true;
-            false_positives++;
-          } else if ((d.color === 1) && (Math.random() < metrics.true_positive_rate)) {
-            // A true positive.
-            d.test_result = true;
-            true_positives++;
-          } else if ((d.color===1) && (Math.random() >= metrics.true_positive_rate)){
-            // A false negative
-            d.test_result = false;
-            false_negatives++;
-          }
-        });
-
-      } else {
-        // Pool incorrectly tests negative
-        pool.forEach(d => {
-          if (d.color === 1) {
-            false_negatives++;
-          } else {
-            true_negatives++;
-          }
-        });
-      }
-    }
-
-    start += pool_size;
-  }
-
-  metrics['simulated_false_negative'] = false_negatives;
-  metrics['simulated_false_positive'] = false_positives;
-  metrics['simulated_true_negative']  = true_negatives;
-  metrics['simulated_true_positive']  = true_positives;
-  metrics['simulated_tests_used']     = tests;
-  metrics['effective_simulated_sensitivity'] = (
-              metrics['simulated_true_positive'] / metrics['positive_count']
-          );
-   metrics['effective_simulated_specificity'] = metrics['simulated_true_negative'] / metrics['negative_count'];
 }
 
 function updatePeople(){
@@ -457,7 +484,7 @@ function init() {
   }
 
   updatePeople();
-  simulate();
+  // simulate();
   computeMetrics();
   updateMetrics();
   makeGraphic();
