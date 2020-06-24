@@ -222,7 +222,7 @@ function computeMetrics() {
   specificity = Number(document.querySelector('#true_negative_rate_slider').value);
   let true_negative_rate = specificity;
   let infection_rate = Number(document.querySelector('#infection_rate_slider').value);
-  let people_count = Number(document.querySelector('#people_count').innerHTML);
+  let people_count = Number(document.querySelector('#people_count_slider').value);
 
   updated_values = {
     "pool_size"                : POOL_SIZE,
@@ -457,7 +457,9 @@ function computeSamplePoolingMetrics() {
 }
 
 function updatePeople(){
-  let infected = getRandomSample(people, metrics.positive_count);
+  let positive_count = Math.round(metrics.infection_rate*people_count);
+
+  let infected = getRandomSample(people, positive_count);
   people.forEach((d)   => {
     d.color = 0;
   });
