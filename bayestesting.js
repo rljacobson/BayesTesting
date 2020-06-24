@@ -126,6 +126,33 @@ function animationIntervalHandler(){
   }
 }
 
+function lambertW(x, tol) {
+  if (!(tol)){
+    tol = 0.00000001
+  }
+  let w_last = 0;
+  let w = 1;
+  let f;
+  let ex;
+
+  while(Math.abs(w-w_last)/Math.abs(w) > tol){
+    w_last = w;
+    ex = Math.exp(w);
+    f = w*ex - x;
+    w = w - f/((ex*(w+1) - (w+2)*f/(2*w+2)));
+  }
+  return w;
+}
+
+function optimalPoolSize(sensitivity, specificity, infection_rate){
+  // ln(1-i)
+  let lnomi = Math.log(1 - infection_rate);
+  // 1 - sensitivity - specificity
+  let omsms = 1 - sensitivity - specificity;
+
+  return 2 * lambertW(-lnomi * Math.sqrt(omsms/lnomi)/(2*omsms)) / lnomi;
+  // return lnomi * Math.sqrt(omsms/lnomi)/(2*omsms);
+}
 
 function getRandomSample(array, count) {
   let indices = [];
@@ -202,6 +229,7 @@ function updateMetrics(){
     'people_count',
     'pool_size',
     'tests_used',
+    'optimal_pool_size'
   ];
   let currency = [
     'total_cost',
@@ -215,7 +243,7 @@ function updateMetrics(){
 
   for (i = 0; i<2; i++) {
     metrics = metrics_set[i];
-    console.log(metrics);
+    // console.log(metrics);
     for (const property in metrics) {
       let value = metrics[property];
       let dom_obj = document.querySelector(`#${metrics.prefix}${property}`);
@@ -230,7 +258,7 @@ function updateMetrics(){
           dom_obj.innerHTML = value.toFixed(4);
         }
       } else {
-        console.log(`The selector #${metrics.prefix}${property} is ${document.querySelector('#' + metrics.prefix + property)}.`);
+        // console.log(`The selector #${metrics.prefix}${property} is ${document.querySelector('#' + metrics.prefix + property)}.`);
       }
     }
   }
@@ -262,37 +290,6 @@ function updateMetrics(){
     }
   }
 
-  /*
-  // Sample Pooling metrics
-  for (const property in spmetrics){
-    let value = spmetrics[property];
-    let dom_obj = document.querySelector(`#pooling_${property}`);
-    if(dom_obj){
-      if(percentages.includes(property)){
-        dom_obj.innerHTML = `${(value * 100).toFixed(2)}%`;
-      } else if (integers.includes(property)) {
-        dom_obj.innerHTML = `${Math.round(value)}`;
-      } else if (currency.includes(property)){
-        dom_obj.innerHTML = currencyFormat(value);
-      } else{
-        dom_obj.innerHTML = value.toFixed(4);
-      }
-    } else{
-      console.log(`The selector #pooling_${property} is ${document.querySelector('#pooling_'+property)}.`);
-    }
-  }
-
-  // costs for naive testing
-  let dom_obj = document.querySelector(`#total_cost`);
-  dom_obj.innerHTML = '$' + d3.format(",")(metrics.total_cost);
-  // costs for sample pooling
-  dom_obj = document.querySelector(`#pooling_total_cost`);
-  dom_obj.innerHTML = '$' + d3.format(",")(Math.round(spmetrics.total_cost));
-  // cost per test labels
-  dom_obj = document.querySelector(`#pooling_total_cost_label`);
-  dom_obj.innerHTML = '$' + d3.format(",")(Math.round(DEFAULT_VALUES.cost_per_test));
-
- */
 }
 
 function computeMetrics(sensitivity, specificity, tests_used) {
@@ -496,59 +493,8 @@ function computeSamplePoolingMetrics() {
   let pooling_tests_used = people_count*(pool_positive + 1.0/pool_size);
 
   spmetrics = computeMetrics(positive_given_infected, negative_given_not_infected, pooling_tests_used);
+  spmetrics['optimal_pool_size'] = optimalPoolSize(sensitivity, specificity, infection_rate);
   spmetrics['prefix'] = 'pooling_';
-  /*
-  let pooling_true_positive_rate   = positive_given_infected;
-  let pooling_true_negative_rate   = negative_given_not_infected;
-  let pooling_false_positive_rate  = 1 - pooling_true_negative_rate;
-  let pooling_false_negative_rate  = 1 - pooling_true_positive_rate;
-  let pooling_false_positive_count = people_count*(1 - infection_rate)*pooling_false_positive_rate;
-  let pooling_false_negative_count = people_count * infection_rate * pooling_false_negative_rate;
-  let pooling_true_positive_count  =   pooling_true_positive_rate*people_count * infection_rate ;
-  let pooling_true_negative_count  =  pooling_true_negative_rate*people_count*(1 - infection_rate);
-
-
-  spmetrics = {
-
-    'pool_not_infected' :pool_not_infected,
-    'pool_infected': pool_infected,
-    'pool_positive_given_not_infected' : pool_positive_given_not_infected,
-    'infected_given_pool_positive' : infected_given_pool_positive,
-    'not_infected_given_pool_positive': not_infected_given_pool_positive,
-    'positive_given_pool_positive' : positive_given_pool_positive,
-    'negative_given_pool_positive' : negative_given_pool_positive,
-    'pool_positive' : pool_positive,
-    'pool_negative': pool_negative,
-    'negative_given_pool_negative' : 1,
-    'not_infected_given_pool_infected': not_infected_given_pool_infected,
-    'infected_given_pool_infected': infected_given_pool_infected,
-    'pool_negative_given_not_infected': pool_negative_given_not_infected,
-
-
-    ////
-    "sensitivity"          : pooling_true_positive_rate,
-    "specificity"          : pooling_true_negative_rate,
-    "positive_count"       : metrics.positive_count,
-    "negative_count"       : metrics.negative_count,
-    "true_positive_rate"   : pooling_true_positive_rate, // alias
-    "true_negative_rate"   : pooling_true_negative_rate, // alias
-    "true_positive_count"  : pooling_true_positive_count,
-    "true_negative_count"  : pooling_true_negative_count,
-    "false_positive_count" : pooling_false_positive_count,
-    "false_negative_count" : pooling_false_negative_count,
-    "precision"            : pooling_true_positive_count /
-                              metrics.positive_count,
-    "negative_predictive_value": (1.0 - infection_rate) * pooling_true_positive_rate /
-                                  ((1.0 - infection_rate) * pooling_true_positive_rate +
-                                  infection_rate * pooling_false_negative_rate),
-    "false_negative_rate" : pooling_false_negative_rate,
-    "false_positive_rate" : pooling_false_positive_rate,
-    "tests_used" : pooling_tests_used,
-    "total_cost" : Math.round(pooling_tests_used*DEFAULT_VALUES.cost_per_test),
-    "cost_per_test_out": DEFAULT_VALUES.cost_per_test
-  };
-  */
-
 }
 
 function updatePeople(){

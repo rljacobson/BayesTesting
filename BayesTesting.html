@@ -341,11 +341,16 @@
             <hr class="row-line">
 
             <div class="slider-group column-item">
-                <label class="slider-labels" for="pool_size_slider">
-                    Pool Size: </label>
-                <output for="pool_size_slider" id="pool_size"
-                        class="slider-labels">25
-                </output>
+                <div class="column-item row-container">
+                    <span class="row-item">
+                        <label class="slider-labels row-item" for="pool_size_slider">
+                            Pool Size: </label>
+                        <output for="pool_size_slider" id="pool_size"
+                                class="slider-labels">25
+                        </output>
+                    </span>
+                    <span class="row-item slider-labels">Optimal Pool Size: <span id="pooling_optimal_pool_size"></span></span>
+                </div>
                 <br>
                 <input type="range"
                        id="pool_size_slider" class="slider-widget" min="1"
