@@ -1,0 +1,69 @@
+/*
+ CSS for the main interaction
+*/
+.tabset > input[type="radio"] {
+    position: absolute;
+    left: -200vw;
+}
+
+.tabset .tab-panel {
+    display: none;
+}
+
+.tabset > input:first-child:checked ~ .tab-panels > .tab-panel:first-child,
+.tabset > input:nth-child(3):checked ~ .tab-panels > .tab-panel:nth-child(2),
+.tabset > input:nth-child(5):checked ~ .tab-panels > .tab-panel:nth-child(3),
+.tabset > input:nth-child(7):checked ~ .tab-panels > .tab-panel:nth-child(4),
+.tabset > input:nth-child(9):checked ~ .tab-panels > .tab-panel:nth-child(5),
+.tabset > input:nth-child(11):checked ~ .tab-panels > .tab-panel:nth-child(6) {
+    display: block;
+}
+
+.tabset > label {
+    position: relative;
+    display: inline-block;
+    margin-top: -1.3rem;
+    padding-top: 25px;
+    padding-right: 15px;
+    padding-left: 15px;
+    padding-bottom: 15px;
+    /*border: 1px solid transparent;*/
+    border-top: 0;
+    cursor: pointer;
+    font-weight: 600;
+
+    background-color: #b6885a;
+
+    -webkit-box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.59);
+    -moz-box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.59);
+    box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.59);
+
+    z-index: inherit;
+}
+
+.tabset > label:hover,
+.tabset > input:focus + label {
+    color: #ffffff;
+}
+
+.tabset > input:checked + label {
+    /*border-color: #ccc;*/
+    /*border-top: 1px solid #fff;*/
+    /*margin-top: -1px;*/
+
+    background-color: #ef7600;
+    color: #ffffff;
+
+    transition-property: width;
+    transition-duration: 2s;
+    transition-timing-function: ease-in-out;
+    transition-delay: 1s;
+
+    -webkit-box-shadow: 0px 2px 14px 0px rgba(0,0,0,0.7);
+    -moz-box-shadow: 0px 2px 14px 0px rgba(0,0,0,0.7);
+    box-shadow: 0px 2px 14px 0px rgba(0,0,0,0.7);
+}
+
+.tabset {
+    width: 30rem;
+}

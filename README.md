@@ -9,3 +9,7 @@
 This demo compares individual testing with sample pooling for COVID-19. See it live here:
 
 https://www.robertjacobson.dev/BayesTesting/BayesTesting.html
+
+It is possible to set default values with parameters in the URL:
+
+https://www.robertjacobson.dev/BayesTesting/BayesTesting.html?specificity=0.99&infection_rate=0.01&people_count=1500&pool_size=25

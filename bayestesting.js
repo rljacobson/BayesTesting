@@ -2,23 +2,33 @@
 /*---------------------UI Constants---------------------*/
 
 // Constants
+const currencyFormat = d3.format("$,.2f");
 const ANIMATION_INTERVAL = 1000;
-const POOL_SIZE = 30;
-const COST_PER_TEST = 22;
-let metrics;
+let nmetrics;
 let spmetrics;
 let people;
-const n = 50;
-const people_count = n*n;
 let continueAnimation = false;
 let peopleChanged = false;
 const ANIMATIONINTERVAL = window.setInterval(animationIntervalHandler, ANIMATION_INTERVAL);
+
+// These are the default values and can be set by a URL parameter.
+const DEFAULT_VALUES = {
+  'pool_size': 15,
+  'cost_per_test': 100,
+  'people_count': 10000,
+  'infection_rate': 0.05,
+  'sensitivity': 0.85,
+  'specificity': 1.0,
+  'select_stats': 'naive'
+}
 
 
 /*---------------------Graphics Constants---------------------*/
 
 const width  = 50;
 const height = 50;
+const n = 50; // Only for graphics!
+// const people_count = n*n;
 
 const svg = d3.select("#people_dots")
               .append("svg")
@@ -45,7 +55,7 @@ const pack = data => d3.pack().size([width, height])(
   );
 
 
-function radioDisplay(){
+function attachRadioHandlers(){
   d3.selectAll("input[name='displayAsRadio']")
     .on("change", function() {
       // mutable displayAs = this.value;
@@ -68,8 +78,14 @@ function radioDisplay(){
           .attr("transform", d => `translate(${x(d.x + 1)},${y(d.y + 1)})`);
       }
     });
-
   document.querySelector(`#Cluster`).checked = true;
+
+  d3.selectAll("input[name='tabset']")
+    .on("change", function() {
+      DEFAULT_VALUES.select_stats = this.value;
+      // One of the very few times `updateMetrics()` can be called without first calling `compute*()`.
+      updateMetrics();
+    });
 }
 
 function makeGraphic(){
@@ -102,14 +118,11 @@ function updateColors(){
 function animationIntervalHandler(){
   if(continueAnimation){
     continueAnimation = false;
-    // computeMetrics();
     if(peopleChanged){
       updatePeople();
       updateColors();
       peopleChanged = false;
     }
-    // simulate();
-    // updateMetrics();
   }
 }
 
@@ -129,12 +142,24 @@ function getRandomSample(array, count) {
   return result;
 }
 
+function tabUpdate(val){
+  DEFAULT_VALUES.select_stats = val;
+}
+
 function sliderUpdate(val, valueLabel) {
   if(valueLabel === '#infection_rate') {
-    document.querySelector(valueLabel).value = (val * 100.0).toFixed(2) + '%';
     peopleChanged = true;
   }
-  computeMetrics();
+
+
+  DEFAULT_VALUES.sensitivity = Number(document.querySelector('#true_positive_rate_slider').value);
+  DEFAULT_VALUES.specificity = Number(document.querySelector('#true_negative_rate_slider').value);
+  DEFAULT_VALUES.infection_rate = Number(document.querySelector('#infection_rate_slider').value);
+  DEFAULT_VALUES.people_count = Number(document.querySelector('#people_count_slider').value);
+  DEFAULT_VALUES.pool_size = Number(document.querySelector('#pool_size_slider').value);
+
+  computeNaiveMetrics();
+  computeSamplePoolingMetrics();
   updateMetrics();
   continueAnimation = true;
 }
@@ -178,24 +203,66 @@ function updateMetrics(){
     'pool_size',
     'tests_used',
   ];
+  let currency = [
+    'total_cost',
+    'cost_per_test_label'
+  ]
 
-  // Naive metrics
-  for (const property in metrics){
-    let value = metrics[property];
-    let dom_obj = document.querySelector(`#${property}`);
-    if(dom_obj){
-      if(percentages.includes(property)){
-        dom_obj.innerHTML = `${(value * 100).toFixed(2)}%`;
-      } else if (integers.includes(property)){
-        dom_obj.innerHTML = `${Math.round(value)}`;
-      } else{
-        dom_obj.innerHTML = value.toFixed(4);
+  let metrics;
+
+  // Update the expected values.
+  let metrics_set = [nmetrics,  spmetrics];
+
+  for (i = 0; i<2; i++) {
+    metrics = metrics_set[i];
+    console.log(metrics);
+    for (const property in metrics) {
+      let value = metrics[property];
+      let dom_obj = document.querySelector(`#${metrics.prefix}${property}`);
+      if (dom_obj) {
+        if (percentages.includes(property)) {
+          dom_obj.innerHTML = `${(value * 100).toFixed(2)}%`;
+        } else if (integers.includes(property)) {
+          dom_obj.innerHTML = `${Math.round(value)}`;
+        } else if (currency.includes(property)) {
+          dom_obj.innerHTML = currencyFormat(value);
+        } else {
+          dom_obj.innerHTML = value.toFixed(4);
+        }
+      } else {
+        console.log(`The selector #${metrics.prefix}${property} is ${document.querySelector('#' + metrics.prefix + property)}.`);
       }
-    } else{
-      console.log(`The selector #${property} is ${document.querySelector('#'+property)}.`);
     }
   }
 
+  // Now update the stats based on tab selected.
+
+  if (DEFAULT_VALUES.select_stats === "naive"){
+    metrics = nmetrics;
+  } else{
+    metrics = spmetrics;
+  }
+
+  // Update stats - without prefix
+  for (const property in metrics) {
+    let value = metrics[property];
+    let dom_obj = document.querySelector(`#${property}`);
+    if (dom_obj) {
+      if (percentages.includes(property)) {
+        dom_obj.innerHTML = `${(value * 100).toFixed(2)}%`;
+      } else if (integers.includes(property)) {
+        dom_obj.innerHTML = `${Math.round(value)}`;
+      } else if (currency.includes(property)) {
+        dom_obj.innerHTML = currencyFormat(value);
+      } else {
+        dom_obj.innerHTML = value.toFixed(4);
+      }
+    } else {
+      // pass
+    }
+  }
+
+  /*
   // Sample Pooling metrics
   for (const property in spmetrics){
     let value = spmetrics[property];
@@ -203,8 +270,10 @@ function updateMetrics(){
     if(dom_obj){
       if(percentages.includes(property)){
         dom_obj.innerHTML = `${(value * 100).toFixed(2)}%`;
-      } else if (integers.includes(property)){
+      } else if (integers.includes(property)) {
         dom_obj.innerHTML = `${Math.round(value)}`;
+      } else if (currency.includes(property)){
+        dom_obj.innerHTML = currencyFormat(value);
       } else{
         dom_obj.innerHTML = value.toFixed(4);
       }
@@ -213,31 +282,33 @@ function updateMetrics(){
     }
   }
 
-  // costs
+  // costs for naive testing
   let dom_obj = document.querySelector(`#total_cost`);
   dom_obj.innerHTML = '$' + d3.format(",")(metrics.total_cost);
+  // costs for sample pooling
   dom_obj = document.querySelector(`#pooling_total_cost`);
   dom_obj.innerHTML = '$' + d3.format(",")(Math.round(spmetrics.total_cost));
+  // cost per test labels
+  dom_obj = document.querySelector(`#pooling_total_cost_label`);
+  dom_obj.innerHTML = '$' + d3.format(",")(Math.round(DEFAULT_VALUES.cost_per_test));
 
-
+ */
 }
 
-function computeMetrics() {
-  let sensitivity, specificity;
-  sensitivity = Number(document.querySelector('#true_positive_rate_slider').value);
+function computeMetrics(sensitivity, specificity, tests_used) {
   let true_positive_rate = sensitivity;
-  specificity = Number(document.querySelector('#true_negative_rate_slider').value);
   let true_negative_rate = specificity;
-  let infection_rate = Number(document.querySelector('#infection_rate_slider').value);
-  let people_count = Number(document.querySelector('#people_count_slider').value);
-  let pool_size = Number(document.querySelector('#pool_size_slider').value);
+  let infection_rate = DEFAULT_VALUES.infection_rate;
+  let people_count = DEFAULT_VALUES.people_count;
+  let pool_size = DEFAULT_VALUES.pool_size;
+  let cost_per_test = DEFAULT_VALUES.cost_per_test;
 
   let updated_values = {
     "pool_size"                : pool_size,
     "infection_rate"           : infection_rate,
     "people_count"             : people_count,
-    "tests_used"               : people_count,
-    "total_cost"               : people_count*COST_PER_TEST,
+    "tests_used"               : tests_used,
+    "total_cost"               : tests_used*cost_per_test,
     "sensitivity"              : sensitivity,
     "specificity"              : specificity,
     "true_positive_rate"       : true_positive_rate,
@@ -249,63 +320,69 @@ function computeMetrics() {
     "positive_count"           : people_count * infection_rate,
     "negative_count"           : people_count * (1.0 - infection_rate),
     "precision"                : infection_rate * sensitivity /
-                                  (infection_rate * sensitivity +
+                                 (infection_rate * sensitivity +
                                   (1.0 - infection_rate) * (1.0 - specificity)),
     "negative_predictive_value": (1.0 - infection_rate) * specificity /
                                  ((1.0 - infection_rate) * specificity +
                                   infection_rate * (1 - sensitivity)),
     "false_negative_rate" : 1.0 - sensitivity,
-    "false_positive_rate" : 1.0 - specificity
+    "false_positive_rate" : 1.0 - specificity,
+    "cost_per_test_out": cost_per_test
   };
-  if(typeof metrics !== 'undefined'){
-    metrics = Object.assign(metrics, updated_values);
-  } else{
-    metrics = updated_values;
-  }
+  // if(typeof metrics !== 'undefined'){
+  //   metrics = Object.assign(metrics, updated_values);
+  // } else{
+  //   metrics = updated_values;
+  // }
 
-  metrics["false_discovery_rate"]   = 1.0 - metrics["precision"];
-  metrics["false_omission_rate"]    = 1.0 - metrics["negative_predictive_value"];
-  metrics["critical_success_index"] = infection_rate * sensitivity /
-                                      (infection_rate + (1.0 - infection_rate) * (1.0 - specificity));
-  metrics["prevalence_threshold"] = (Math.sqrt(true_positive_rate * (1 - true_negative_rate)) +
-                                     true_negative_rate - 1) /
-                                     (true_negative_rate + true_negative_rate - 1);
-  metrics["threat_score"] = metrics["true_positive_count"] /
-                             (metrics["true_positive_count"] + metrics["false_negative_count"] +
-                             metrics["false_positive_count"]);
-  metrics["accuracy"] = infection_rate*sensitivity + (1.0-infection_rate) * specificity;
-  metrics["balanced_accuracy"] = (sensitivity + specificity)/2.0;
-  metrics["f1_score"] = 2.0*metrics["precision"]*sensitivity/(metrics["precision"]+sensitivity);
+  updated_values["false_discovery_rate"]   = 1.0 - updated_values["precision"];
+  updated_values["false_omission_rate"]    = 1.0 - updated_values["negative_predictive_value"];
+  updated_values["critical_success_index"] = infection_rate * sensitivity /
+                                             (infection_rate + (1.0 - infection_rate) * (1.0 - specificity));
+  updated_values["prevalence_threshold"] = (Math.sqrt(true_positive_rate * (1 - true_negative_rate)) +
+                                            true_negative_rate - 1) /
+                                           (true_negative_rate + true_negative_rate - 1);
+  updated_values["threat_score"] = updated_values["true_positive_count"] /
+                                   (updated_values["true_positive_count"] + updated_values["false_negative_count"] +
+                                    updated_values["false_positive_count"]);
+  updated_values["accuracy"] = infection_rate*sensitivity + (1.0-infection_rate) * specificity;
+  updated_values["balanced_accuracy"] = (sensitivity + specificity)/2.0;
+  updated_values["f1_score"] = 2.0*updated_values["precision"]*sensitivity/(updated_values["precision"]+sensitivity);
 
   // For Matthew's Correlation Coefficient
-  let true_positive_count  = metrics["true_positive_count"];
-  let false_positive_count = metrics["false_positive_count"];
-  let true_negative_count  = metrics["true_negative_count"];
-  let false_negative_count = metrics["false_negative_count"];
+  let true_positive_count  = updated_values["true_positive_count"];
+  let false_positive_count = updated_values["false_positive_count"];
+  let true_negative_count  = updated_values["true_negative_count"];
+  let false_negative_count = updated_values["false_negative_count"];
 
-  metrics["matthews_cc"] = (true_positive_count * true_negative_count -
-                            false_positive_count* false_negative_count) /
-                           Math.sqrt((true_positive_count + false_positive_count) *
-                                     (true_positive_count+false_negative_count)   *
-                                     (true_negative_count+false_positive_count)   *
-                                     (true_negative_count+false_negative_count)
-                           );
-  metrics["fowlkes_mallows_index"] = Math.sqrt(metrics["precision"] * true_positive_rate);
-  metrics["informedness"] = sensitivity + specificity - 1.0;
-  metrics["markedness"] = metrics["precision"] + metrics["negative_predictive_value"] - 1;
+  updated_values["matthews_cc"] = (true_positive_count * true_negative_count -
+                                   false_positive_count* false_negative_count) /
+                                  Math.sqrt((true_positive_count + false_positive_count) *
+                                            (true_positive_count+false_negative_count)   *
+                                            (true_negative_count+false_positive_count)   *
+                                            (true_negative_count+false_negative_count)
+                                  );
+  updated_values["fowlkes_mallows_index"] = Math.sqrt(updated_values["precision"] * true_positive_rate);
+  updated_values["informedness"] = sensitivity + specificity - 1.0;
+  updated_values["markedness"] = updated_values["precision"] + updated_values["negative_predictive_value"] - 1;
 
-  computeSamplePoolingMetrics();
+  return updated_values;
 }
 
-// Called by computeMetrics();
+function computeNaiveMetrics(){
+  nmetrics = computeMetrics(DEFAULT_VALUES.sensitivity, DEFAULT_VALUES.specificity, DEFAULT_VALUES.people_count);
+  nmetrics['prefix'] = 'naive_';
+}
+
 function computeSamplePoolingMetrics() {
-  let pool_size           = metrics.pool_size;
-  let people_count        = metrics.people_count;
-  let sensitivity         = metrics.sensitivity;
-  let specificity         = metrics.specificity;
-  let infection_rate      = metrics.infection_rate;
-  let false_positive_rate = metrics.false_positive_rate;
-  let false_negative_rate = metrics.false_negative_rate;
+  let sensitivity, specificity;
+  sensitivity = DEFAULT_VALUES.sensitivity;
+  specificity = DEFAULT_VALUES.specificity;
+  let infection_rate = DEFAULT_VALUES.infection_rate;
+  let people_count = DEFAULT_VALUES.people_count;
+  let pool_size = DEFAULT_VALUES.pool_size;
+  let false_positive_rate = 1-specificity;
+  let false_negative_rate = 1-sensitivity;
 
   /*
     We assume pooling doesn't affect sensitivity and specificity. Though this is unlikely for most testing
@@ -416,7 +493,11 @@ function computeSamplePoolingMetrics() {
   // P(negative | pool negative) = 1 by def of sample pooling
   // negative_given_pool_negative = 1;
 
-  let pooling_tests_used = metrics.people_count*(pool_positive + 1.0/pool_size);
+  let pooling_tests_used = people_count*(pool_positive + 1.0/pool_size);
+
+  spmetrics = computeMetrics(positive_given_infected, negative_given_not_infected, pooling_tests_used);
+  spmetrics['prefix'] = 'pooling_';
+  /*
   let pooling_true_positive_rate   = positive_given_infected;
   let pooling_true_negative_rate   = negative_given_not_infected;
   let pooling_false_positive_rate  = 1 - pooling_true_negative_rate;
@@ -428,7 +509,7 @@ function computeSamplePoolingMetrics() {
 
 
   spmetrics = {
-    /*
+
     'pool_not_infected' :pool_not_infected,
     'pool_infected': pool_infected,
     'pool_positive_given_not_infected' : pool_positive_given_not_infected,
@@ -443,7 +524,7 @@ function computeSamplePoolingMetrics() {
     'infected_given_pool_infected': infected_given_pool_infected,
     'pool_negative_given_not_infected': pool_negative_given_not_infected,
 
-     */
+
     ////
     "sensitivity"          : pooling_true_positive_rate,
     "specificity"          : pooling_true_negative_rate,
@@ -463,14 +544,17 @@ function computeSamplePoolingMetrics() {
     "false_negative_rate" : pooling_false_negative_rate,
     "false_positive_rate" : pooling_false_positive_rate,
     "tests_used" : pooling_tests_used,
-    "total_cost" : pooling_tests_used*COST_PER_TEST,
+    "total_cost" : Math.round(pooling_tests_used*DEFAULT_VALUES.cost_per_test),
+    "cost_per_test_out": DEFAULT_VALUES.cost_per_test
   };
-
+  */
 
 }
 
 function updatePeople(){
-  let positive_count = Math.round(metrics.infection_rate*people_count);
+  const people_count = n*n;
+
+  let positive_count = Math.round(DEFAULT_VALUES.infection_rate*people_count);
 
   let infected = getRandomSample(people, positive_count);
   people.forEach((d)   => {
@@ -481,10 +565,42 @@ function updatePeople(){
   });
 }
 
+function processURLParams(){
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const entries = urlParams.entries();
+  // const keys = urlParams.keys();
+  // const values = urlParams.values();
+
+  // for (const key of keys) console.log(key);
+  // for (const value of values) console.log(value);
+
+  // console.log(queryString);
+
+  for(const entry of entries) {
+    console.log(`${entry[0]}: ${entry[1]}`);
+    if (DEFAULT_VALUES.hasOwnProperty(entry[0])){
+      if (Number(entry[1])){
+        DEFAULT_VALUES[entry[0]] = Number(entry[1]);
+      }
+    }
+  }
+
+  // Set the default parameter values.
+  document.querySelector('#true_positive_rate_slider').value = DEFAULT_VALUES.sensitivity;
+  document.querySelector('#true_negative_rate_slider').value = DEFAULT_VALUES.specificity;
+  document.querySelector('#infection_rate_slider').value = DEFAULT_VALUES.infection_rate;
+  document.querySelector('#people_count_slider').value = DEFAULT_VALUES.people_count;
+  document.querySelector('#pool_size_slider').value = DEFAULT_VALUES.pool_size;
+}
+
+
 function init() {
-  // Globals.
-  people = [];
-  computeMetrics();
+  people = []; // Global
+
+  processURLParams();
+  computeNaiveMetrics();
+  computeSamplePoolingMetrics();
 
   for (let x = 0; x < n; x++) {
     for (let y = 0; y < n; y++) {
@@ -499,11 +615,9 @@ function init() {
   }
 
   updatePeople();
-  // simulate();
-  computeMetrics();
   updateMetrics();
   makeGraphic();
-  radioDisplay();
+  attachRadioHandlers();
 }
 
 init();

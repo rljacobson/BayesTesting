@@ -23,7 +23,7 @@
     <a href="https://github.com/rljacobson/BayesTesting/watchers/"><img src="https://camo.githubusercontent.com/c4a95f8295a39056927edc7eec5a9d1b341453be/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f77617463686572732f726c6a61636f62736f6e2f426179657354657374696e672e7376673f7374796c653d736f6369616c266c6162656c3d5761746368266d61784167653d32353932303030" alt="GitHub watchers" data-canonical-src="https://img.shields.io/github/watchers/rljacobson/BayesTesting.svg?style=social&amp;label=Watch&amp;maxAge=2592000" style="max-width:100%;"></a>
     <a href="https://github.com/rljacobson?tab=followers"><img src="https://camo.githubusercontent.com/c48b0d33bd59711449b85b7283e2057971c260e7/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f666f6c6c6f776572732f726c6a61636f62736f6e2e7376673f7374796c653d736f6369616c266c6162656c3d466f6c6c6f77266d61784167653d32353932303030" alt="GitHub followers" data-canonical-src="https://img.shields.io/github/followers/rljacobson.svg?style=social&amp;label=Follow&amp;maxAge=2592000" style="max-width:100%;"></a>
 </p>
-<h1 id="page-heading">Comparison Between Naïve Testing and Sample Pooling for Whole Populations</h1>
+<h1 id="page-heading">Comparison Between Individual Testing and Sample Pooling for Whole Populations</h1>
 
 
 <div id="center_content">
@@ -37,10 +37,6 @@
                 <input type="number" min="100" max="1000000000" step="10"
                        value="2500" id="people_count_slider"
                        oninput="sliderUpdate(value, '#people_count_slider')"/>
-                <!--div id="people_count_label" class="slider-labels">Number of
-                    People:
-                    <div id="people_count" class="slider-labels">2500</div>
-                </div-->
             </div>
             <div id="people_dots_group" class="column-item row-container">
                 <div id="people_dots" class="row-item"></div>
@@ -87,6 +83,15 @@
                        max="0.2" step="any" value="0.05" oninput="sliderUpdate(value,
                    '#infection_rate')"/>
             </div>
+
+            <div id="cost_per_test_group" class="column-item slider-labels">
+                <label for="cost_per_test_slider" id="cost_per_test_label">
+                    Cost Per Test: <span id="cost_per_test"></span>
+                </label>
+                <input type="number" min="1" max="200" step="1"
+                       value="100" id="cost_per_test_slider"
+                       oninput="sliderUpdate(value, '#cost_per_test_slider')"/>
+            </div>
         </div>
 
         <div id="naive-testing" class="row-item column-container">
@@ -96,11 +101,11 @@
                 <div class="data-metric-def">
                     <dl>
                         <dt>Total Cost</dt>
-                        <dd>at $22 per test</dd>
+                        <dd>at <span id="naive_cost_per_test_out"></span> per test</dd>
                     </dl>
                 </div>
                 <div class="answer-equals">$$=$$</div>
-                <div id="total_cost" class="answer-value"></div>
+                <div id="naive_total_cost" class="answer-value"></div>
             </div>
             <div class="data-metric">
                 <div class="data-metric-def">
@@ -110,7 +115,7 @@
                     </dl>
                 </div>
                 <div class="answer-equals">$$=$$</div>
-                <div id="tests_used" class="answer-value"></div>
+                <div id="naive_tests_used" class="answer-value"></div>
             </div>
             <hr class="row-line">
             <div class="data-metric">
@@ -121,7 +126,7 @@
                     </dl>
                 </div>
                 <div class="answer-equals">$$=$$</div>
-                <div id="true_positive_count" class="answer-value"></div>
+                <div id="naive_true_positive_count" class="answer-value"></div>
             </div>
             <div class="data-metric">
                 <div class="data-metric-def">
@@ -131,7 +136,7 @@
                     </dl>
                 </div>
                 <div class="answer-equals">$$=$$</div>
-                <div id="true_negative_count" class="answer-value"></div>
+                <div id="naive_true_negative_count" class="answer-value"></div>
             </div>
             <div class="data-metric">
                 <div class="data-metric-def">
@@ -146,7 +151,7 @@
                     </dl>
                 </div>
                 <div class="answer-equals">$$=$$</div>
-                <div id="false_positive_count" class="answer-value"></div>
+                <div id="naive_false_positive_count" class="answer-value"></div>
             </div>
             <div class="data-metric">
                 <div class="data-metric-def">
@@ -157,7 +162,7 @@
                     </dl>
                 </div>
                 <div class="answer-equals">$$=$$</div>
-                <div id="false_negative_count" class="answer-value"></div>
+                <div id="naive_false_negative_count" class="answer-value"></div>
             </div>
 
             <hr class="row-line">
@@ -182,7 +187,7 @@
                     </dl>
                 </div>
                 <div class="answer-equals">$$=$$</div>
-                <div id="sensitivity" class="answer-value"></div>
+                <div id="naive_sensitivity" class="answer-value"></div>
             </div>
             <div class="data-metric">
                 <div class="data-metric-def">
@@ -202,32 +207,32 @@
                     </dl>
                 </div>
                 <div class="answer-equals">$$=$$</div>
-                <div id="specificity" class="answer-value"></div>
+                <div id="naive_specificity" class="answer-value"></div>
             </div>
 
             <div class="slider-group column-item">
                 <label class="slider-labels" for="true_positive_rate_slider">
                     Sensitivity (True Positive Rate): </label>
-                <output for="true_positive_rate_slider" id="true_positive_rate"
-                        class="slider-labels">41.00%
+                <output for="true_positive_rate_slider" id="naive_true_positive_rate"
+                        class="slider-labels">85.00%
                 </output>
                 <br>
                 <input type="range"
                        id="true_positive_rate_slider" class="slider-widget" min="0.0"
-                       max="1.0" step="any" value="0.41" oninput="sliderUpdate(value,
+                       max="1.0" step="any" value="0.85" oninput="sliderUpdate(value,
                        '#true_positive_rate')"/><br>
 
                 <label class="slider-labels" for="true_negative_rate_slider">
                     Specificity (True Negative Rate):
                 </label>
-                <output for="true_negative_rate_slider" id="true_negative_rate"
+                <output for="true_negative_rate_slider" id="naive_true_negative_rate"
                         class="slider-labels">
-                    94.00%
+                    100.00%
                 </output>
                 <br>
                 <input type="range"
                        id="true_negative_rate_slider" class="slider-widget" min="0.30"
-                       max="1.0" step="any" value="0.94"
+                       max="1.0" step="any" value="1.0"
                        oninput="sliderUpdate(value, '#true_negative_rate')"/><br>
             </div>
 
@@ -240,7 +245,7 @@
                 <div class="data-metric-def">
                     <dl>
                         <dt>Total Cost</dt>
-                        <dd>at $22 per test</dd>
+                        <dd>at <span id="pooling_cost_per_test_out"></span> per test</dd>
                     </dl>
                 </div>
                 <div class="answer-equals">$$=$$</div>
@@ -355,12 +360,14 @@
     <hr id="pane-separator">
 
     <div id="bottom_pane" class="">
-        <!-- Tab 1 -->
-        <input type="radio" name="tabset" id="naive-tab" aria-controls="Individual Testing" checked>
-        <label for="naive-tab">Individual Testing</label>
-        <!-- Tab 2 -->
-        <input type="radio" name="tabset" id="pooling-tab" aria-controls="Sample Pooling">
-        <label for="pooling-tab">Sample Pooling</label>
+        <div class="tabset">
+            <!-- Tab 1 -->
+            <input type="radio" name="tabset" id="naive-tab" aria-controls="Individual Testing" value="naive" checked>
+            <label for="naive-tab">Individual Testing</label>
+            <!-- Tab 2 -->
+            <input type="radio" name="tabset" id="pooling-tab" aria-controls="Sample Pooling" value="sample_pooling">
+            <label for="pooling-tab">Sample Pooling</label>
+        </div>
 
         <div class="data-metric">
             <div class="data-metric-def">
