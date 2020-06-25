@@ -13,3 +13,17 @@ https://www.robertjacobson.dev/BayesTesting/BayesTesting.html
 It is possible to set default values with parameters in the URL:
 
 https://www.robertjacobson.dev/BayesTesting/BayesTesting.html?specificity=0.99&infection_rate=0.01&people_count=1500&pool_size=25
+
+The variables available to set from the URL are as follows:
+
+```javascript
+DEFAULT_VALUES = {
+    'pool_size'      : 15,
+    'cost_per_test'  : 100,
+    'people_count'   : 10000,  // Number of people
+    'infection_rate' : 0.05,
+    'sensitivity'    : 0.85,
+    'specificity'    : 1.0,
+    'select_stats'   : 'naive' // What the bottom panel shows. (`naive` is individual.)
+}
+```
