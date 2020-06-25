@@ -28,16 +28,21 @@
     padding-left: 15px;
     padding-bottom: 20px;
     border-radius: 1rem;
-    /*border: 1px solid transparent;*/
     border-top: 0;
     cursor: pointer;
     font-weight: 600;
 
-    background-color: #b6885a;
+    background-color: #EEE;
 
     -webkit-box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.59);
     -moz-box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.59);
     box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.59);
+
+    transition: 	border-color .15s ease-out,
+    color .25s ease-out,
+    background-color .25s ease-out,
+    /*margin-top 0.3s ease-out,*/
+    box-shadow .25s ease-out;
 
     z-index: inherit;
 }
@@ -45,20 +50,13 @@
 .tabset > label:hover,
 .tabset > input:focus + label {
     color: #ffffff;
+    /*text-shadow: 0 0 1px black;*/
 }
 
 .tabset > input:checked + label {
-    /*border-color: #ccc;*/
-    /*border-top: 1px solid #fff;*/
-    /*margin-top: -1px;*/
 
     background-color: #ef7600;
     color: #ffffff;
-
-    transition-property: width;
-    transition-duration: 2s;
-    transition-timing-function: ease-in-out;
-    transition-delay: 1s;
 
     -webkit-box-shadow: 0px 2px 14px 0px rgba(0,0,0,0.7);
     -moz-box-shadow: 0px 2px 14px 0px rgba(0,0,0,0.7);

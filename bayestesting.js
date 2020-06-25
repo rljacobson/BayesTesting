@@ -19,7 +19,8 @@ const DEFAULT_VALUES = {
   'infection_rate': 0.05,
   'sensitivity': 0.85,
   'specificity': 1.0,
-  'select_stats': 'naive'
+  'select_stats': 'naive',
+  'stats_panel': 'closed'
 }
 
 
@@ -78,7 +79,8 @@ function attachRadioHandlers(){
           .attr("transform", d => `translate(${x(d.x + 1)},${y(d.y + 1)})`);
       }
     });
-  document.querySelector(`#Cluster`).checked = true;
+  // Set the default
+  d3.selectAll("#Cluster").attr("checked", true);
 
   d3.selectAll("input[name='tabset']")
     .on("change", function() {
@@ -86,6 +88,45 @@ function attachRadioHandlers(){
       // One of the very few times `updateMetrics()` can be called without first calling `compute*()`.
       updateMetrics();
     });
+
+  d3.selectAll("input[name='panelToggle']")
+    .on("change", function() {
+      DEFAULT_VALUES.stats_panel = this.value;
+      togglePanel();
+    });
+  // Set the default
+  if (DEFAULT_VALUES.stats_panel === 'closed'){
+    // height: 100vh;
+    dom_obj = document.querySelector('#panelClose');
+    dom_obj.checked = true;
+  } else{
+    // height: auto;
+    dom_obj = document.querySelector('#panelOpen');
+    dom_obj.checked = true;
+  }
+
+  togglePanel();
+}
+
+function togglePanel(){
+  console.log("Toggled to: " + DEFAULT_VALUES.stats_panel);
+  if (DEFAULT_VALUES.stats_panel === 'closed'){
+    dom_obj = document.querySelector('#bottom_pane');
+    dom_obj.classList.remove('panel_open');
+    dom_obj.classList.add('panel_closed');
+
+    dom_obj = document.querySelector('#pane-separator');
+    dom_obj.classList.remove('panel_open_shadow');
+    dom_obj.classList.add('panel_closed_shadow');
+  } else{
+    dom_obj = document.querySelector('#bottom_pane');
+    dom_obj.classList.remove('panel_closed');
+    dom_obj.classList.add('panel_open');
+
+    dom_obj = document.querySelector('#pane-separator');
+    dom_obj.classList.remove('panel_closed_shadow');
+    dom_obj.classList.add('panel_open_shadow');
+  }
 }
 
 function makeGraphic(){

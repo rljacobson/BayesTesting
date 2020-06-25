@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="bayestesting.css"/>
     <link rel="stylesheet" href="sliders.css"/>
     <link rel="stylesheet" href="tabs.css"/>
+    <link rel="stylesheet" href="paneltoggle.css"/>
 
     <script type="text/javascript" id="MathJax-script" async
             src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
@@ -94,6 +95,14 @@
                        value="100" id="cost_per_test_slider" class="number-input-box"
                        oninput="sliderUpdate(value, '#cost_per_test_slider')"/>
             </div>
+            <fieldset class="column-item">
+                <div class="toggle-panel">
+                    <input type="radio" name="panelToggle" value="closed" id="panelClose"/>
+                    <label for="panelClose">Close Metrics Panel</label>
+                    <input type="radio" name="panelToggle" value="opened" id="panelOpen" checked="checked"/>
+                    <label for="panelOpen">Open Metrics Panel</label>
+                </div>
+            </fieldset>
         </div>
 
         <div id="naive-testing" class="row-item column-container">
@@ -383,9 +392,9 @@
 
     </div>
 
-    <hr id="pane-separator">
+    <hr id="pane-separator" class="panel_closed_shadow">
 
-    <div id="bottom_pane" class="">
+    <div id="bottom_pane" class="panel_closed">
         <div class="tabset">
             <!-- Tab 1 -->
             <input type="radio" name="tabset" id="naive-tab" aria-controls="Individual Testing" value="naive" checked>
@@ -621,5 +630,6 @@
         </div>
     </div>
 
+</div>
 </body>
 </html>
