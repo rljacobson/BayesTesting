@@ -29,15 +29,6 @@
 <div id="center_content">
     <div id="top_pane" class="row-container">
         <div id="illustration" class="row-item column-container">
-            <div id="people_count_group" class="column-item slider-labels">
-                <label for="people_count_slider" id="people_count_label">
-                    Number of
-                    People: <span id="people_count"></span>
-                </label>
-                <input type="number" min="100" max="1000000000" step="10"
-                       value="2500" id="people_count_slider"
-                       oninput="sliderUpdate(value, '#people_count_slider')"/>
-            </div>
             <div id="people_dots_group" class="column-item row-container">
                 <div id="people_dots" class="row-item"></div>
                 <div id="displayAsForm" class="row-item">
@@ -48,6 +39,16 @@
                     <input type="radio" name="displayAsRadio" id="Grid" value="Grid">
                     <label for="Grid">Grid</label>
                 </div>
+            </div>
+
+            <div id="people_count_group" class="column-item margin-top-zero">
+                <label for="people_count_slider" id="people_count_label">
+                    Number of
+                    People: <span id="people_count"></span>
+                </label>
+                <input type="number" min="100" max="1000000000" step="10"
+                       value="2500" id="people_count_slider" class="number-input-box"
+                       oninput="sliderUpdate(value, '#people_count_slider')"/>
             </div>
             <div class="data-metric">
                 <div class="data-metric-def">
@@ -71,7 +72,7 @@
 
             </div>
 
-            <div class="slider-group column-item">
+            <div class="margin-bottom-zero slider-group column-item">
                 <label class="slider-labels" for="infection_rate_slider">
                     Infection Rate:
                 </label>
@@ -84,12 +85,13 @@
                    '#infection_rate')"/>
             </div>
 
-            <div id="cost_per_test_group" class="column-item slider-labels">
+            <div id="cost_per_test_group" class="column-item margin-top-zero">
                 <label for="cost_per_test_slider" id="cost_per_test_label">
                     Cost Per Test: <span id="cost_per_test"></span>
+                    <span class="number-input-box">&nbsp;$</span>
                 </label>
-                <input type="number" min="1" max="200" step="1"
-                       value="100" id="cost_per_test_slider"
+                <input type="number" min="1" max="any" step="1"
+                       value="100" id="cost_per_test_slider" class="number-input-box"
                        oninput="sliderUpdate(value, '#cost_per_test_slider')"/>
             </div>
         </div>
@@ -241,6 +243,24 @@
         <div id="pooling-testing" class="row-item column-container">
             <div class="stats_title column-item">Sample Pooling</div>
             <div class="stats_subtitle column-item">Expected Values</div>
+
+            <div class="slider-group column-item">
+                <div class="column-item row-container margin-bottom-zero" id="optimal_container">
+                    <span class="row-item margin-bottom-zero margin-right-auto">
+                        <label class=" row-item margin-bottom-zero" for="pool_size_slider">
+                            Pool Size: </label>
+                        <output for="pool_size_slider" id="pool_size"
+                                class=" margin-bottom-zero">25
+                        </output>
+                    </span>
+                    <span id="optimal_pool_size_label" class="row-item margin-bottom-zero">Optimal Pool Size: <span id="pooling_optimal_pool_size"></span></span>
+                </div>
+                <input type="range"
+                       id="pool_size_slider" class="slider-widget margin-top-zero" min="1"
+                       max="40" step="1" value="25" oninput="sliderUpdate(value, '#pool_size')"/>
+            </div>
+            <hr class="row-line">
+
             <div class="data-metric">
                 <div class="data-metric-def">
                     <dl>
@@ -254,12 +274,32 @@
             <div class="data-metric">
                 <div class="data-metric-def">
                     <dl>
+                        <dt>Optimal Total Cost</dt>
+                        <dd>cost at optimal pool size</dd>
+                    </dl>
+                </div>
+                <div class="answer-equals">$$=$$</div>
+                <div id="pooling_optimal_cost" class="answer-value"></div>
+            </div>
+            <div class="data-metric">
+                <div class="data-metric-def">
+                    <dl>
                         <dt>Tests Used</dt>
                         <dd>pools and retests</dd>
                     </dl>
                 </div>
                 <div class="answer-equals">$$=$$</div>
                 <div id="pooling_tests_used" class="answer-value"></div>
+            </div>
+            <div class="data-metric">
+                <div class="data-metric-def">
+                    <dl>
+                        <dt>Minimum Tests Possible</dt>
+                        <dd>tests used at optimal pool size</dd>
+                    </dl>
+                </div>
+                <div class="answer-equals">$$=$$</div>
+                <div id="pooling_min_tests_possible" class="answer-value"></div>
             </div>
             <hr class="row-line">
             <div class="data-metric">
@@ -336,25 +376,6 @@
                 </div>
                 <div class="answer-equals">$$=$$</div>
                 <div id="pooling_specificity" class="answer-value"></div>
-            </div>
-
-            <hr class="row-line">
-
-            <div class="slider-group column-item">
-                <div class="column-item row-container">
-                    <span class="row-item">
-                        <label class="slider-labels row-item" for="pool_size_slider">
-                            Pool Size: </label>
-                        <output for="pool_size_slider" id="pool_size"
-                                class="slider-labels">25
-                        </output>
-                    </span>
-                    <span class="row-item slider-labels">Optimal Pool Size: <span id="pooling_optimal_pool_size"></span></span>
-                </div>
-                <br>
-                <input type="range"
-                       id="pool_size_slider" class="slider-widget" min="1"
-                       max="40" step="1" value="25" oninput="sliderUpdate(value, '#pool_size')"/>
             </div>
 
 

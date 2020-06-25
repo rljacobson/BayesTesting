@@ -22,11 +22,12 @@
 .tabset > label {
     position: relative;
     display: inline-block;
-    margin-top: -1.3rem;
-    padding-top: 25px;
+    margin-top: -2.3rem;
+    padding-top: 40px;
     padding-right: 15px;
     padding-left: 15px;
-    padding-bottom: 15px;
+    padding-bottom: 20px;
+    border-radius: 1rem;
     /*border: 1px solid transparent;*/
     border-top: 0;
     cursor: pointer;

@@ -126,6 +126,12 @@ function animationIntervalHandler(){
   }
 }
 
+/**
+  I had to write my own Lambert-W implementation,  because the only version I could find online
+  cannot handle input less than $$e$$. The function uses the well-known Halley's method, which
+  is just Newton's method but with one more term of the Taylor series. I use an initial guess
+  of $$w=1$$ regardless of the value of the input.
+*/
 function lambertW(x, tol) {
   if (!(tol)){
     tol = 0.00000001
@@ -144,14 +150,20 @@ function lambertW(x, tol) {
   return w;
 }
 
+/**
+  The number of tests required is given by
+  $$f(s) = n \left(\text{sense} \left(1-(1-i)^s\right)+(1-\text{spec}) (1-i)^s\right)+\frac{n}{s}$$,
+  which can be minimized with standard freshman calculus. Mathematica can find the solution to
+  $$f'(s)=0$$, which involves the Lambert-W function.
+ */
 function optimalPoolSize(sensitivity, specificity, infection_rate){
+
   // ln(1-i)
   let lnomi = Math.log(1 - infection_rate);
   // 1 - sensitivity - specificity
   let omsms = 1 - sensitivity - specificity;
 
   return 2 * lambertW(-lnomi * Math.sqrt(omsms/lnomi)/(2*omsms)) / lnomi;
-  // return lnomi * Math.sqrt(omsms/lnomi)/(2*omsms);
 }
 
 function getRandomSample(array, count) {
@@ -184,6 +196,7 @@ function sliderUpdate(val, valueLabel) {
   DEFAULT_VALUES.infection_rate = Number(document.querySelector('#infection_rate_slider').value);
   DEFAULT_VALUES.people_count = Number(document.querySelector('#people_count_slider').value);
   DEFAULT_VALUES.pool_size = Number(document.querySelector('#pool_size_slider').value);
+  DEFAULT_VALUES.cost_per_test = Number(document.querySelector('#cost_per_test_slider').value);
 
   computeNaiveMetrics();
   computeSamplePoolingMetrics();
@@ -229,11 +242,13 @@ function updateMetrics(){
     'people_count',
     'pool_size',
     'tests_used',
-    'optimal_pool_size'
+    'optimal_pool_size',
+    'min_tests_possible'
   ];
   let currency = [
     'total_cost',
-    'cost_per_test_label'
+    'cost_per_test_out',
+    'optimal_cost'
   ]
 
   let metrics;
@@ -493,7 +508,19 @@ function computeSamplePoolingMetrics() {
   let pooling_tests_used = people_count*(pool_positive + 1.0/pool_size);
 
   spmetrics = computeMetrics(positive_given_infected, negative_given_not_infected, pooling_tests_used);
-  spmetrics['optimal_pool_size'] = optimalPoolSize(sensitivity, specificity, infection_rate);
+
+  // Computation of Optimal Values //
+
+  optimal_pool_size = optimalPoolSize(sensitivity, specificity, infection_rate);
+  spmetrics['optimal_pool_size'] = optimal_pool_size;
+  // This just reiterates the computation of number of tests but with `optimal_pool_size`.
+  pool_not_infected = (1 - infection_rate)**optimal_pool_size;
+  pool_infected     = 1 - pool_not_infected;
+  pool_positive =  sensitivity*pool_infected + false_positive_rate * pool_not_infected;
+  pooling_tests_used = people_count*(pool_positive + 1.0/optimal_pool_size);
+  let optimal_total_cost = DEFAULT_VALUES.cost_per_test * pooling_tests_used;
+  spmetrics['optimal_cost'] = optimal_total_cost;
+  spmetrics['min_tests_possible'] = pooling_tests_used;
   spmetrics['prefix'] = 'pooling_';
 }
 
@@ -538,6 +565,8 @@ function processURLParams(){
   document.querySelector('#infection_rate_slider').value = DEFAULT_VALUES.infection_rate;
   document.querySelector('#people_count_slider').value = DEFAULT_VALUES.people_count;
   document.querySelector('#pool_size_slider').value = DEFAULT_VALUES.pool_size;
+  document.querySelector(`#${DEFAULT_VALUES.select_stats}-tab`).checked = true;
+
 }
 
 
